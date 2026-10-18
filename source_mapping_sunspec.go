@@ -49,7 +49,7 @@ func MapSunSpecModel103ActivePower(mapping SourceMapping, source SourceIdentity,
 	if source != mapping.Source {
 		return ConversionResult{}, ErrSourceIdentityMismatch
 	}
-	if source.Protocol != "sunspec-modbus" || !strings.Contains(source.Point, "model:103:W") || !strings.Contains(source.Point, "scale-factor:W_SF") {
+	if source.Protocol != "sunspec-modbus" || source.Point != "model:103:W;scale-factor:W_SF" {
 		return ConversionResult{}, ErrInvalidSourceMapping
 	}
 	if err := ValidateSourceMapping(mapping); err != nil {
