@@ -97,6 +97,12 @@ device documentation. Treat profiles as configuration that requires review.
 
 ## SunSpec scale factors
 
+The SunSpec model definition used for this example is the public
+[SunSpec Models repository, Model 103 JSON](https://github.com/SunSpec/models/blob/master/json/model_103.json),
+which defines the `W` AC power point in watts and associates it with `W_SF`.
+This confirms the point/scale-factor relationship only; it does not certify any
+specific device's register base address, firmware behavior, or live values.
+
 SunSpec integer points can use a separate scale-factor point (for example,
 `W` together with `W_SF`). Resolve the scale factor from the same model/device
 snapshot and apply `engineering value = raw × 10^scale factor` before passing
