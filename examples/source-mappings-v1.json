@@ -28,6 +28,34 @@
       "scale_denominator": 1,
       "offset_numerator": 0,
       "offset_denominator": 1
+    },
+    {
+      "source": {
+        "protocol": "modbus",
+        "device": "temp-meter-1",
+        "point": "holding:30001"
+      },
+      "descriptor_id": 66,
+      "source_unit": "degree_Celsius",
+      "canonical_unit": "degree_Celsius",
+      "scale_numerator": 1,
+      "scale_denominator": 1,
+      "offset_numerator": 0,
+      "offset_denominator": 1
+    },
+    {
+      "source": {
+        "protocol": "modbus",
+        "device": "temp-meter-1",
+        "point": "holding:30002"
+      },
+      "descriptor_id": 66,
+      "source_unit": "kelvin",
+      "canonical_unit": "degree_Celsius",
+      "scale_numerator": 1,
+      "scale_denominator": 1,
+      "offset_numerator": -27315,
+      "offset_denominator": 100
     }
   ]
 }
