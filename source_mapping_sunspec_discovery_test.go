@@ -112,7 +112,7 @@ func TestDiscoverSunSpecModel103AdapterUsesDiscoveredAddress(t *testing.T) {
 		t.Fatalf("unexpected discovery/read requests: addresses=%v quantities=%v", client.addrs, client.quantities)
 	}
 
-	// Exercise the full path from discovered Modbus registers to canonical EABC atom.
+	// Exercise the full path from discovered Modbus registers to canonical watts.
 	mapping := SourceMapping{
 		Source: source, DescriptorID: 69,
 		SourceUnit: "watt (after W_SF application)", CanonicalUnit: "watt",
