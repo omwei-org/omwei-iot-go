@@ -3,6 +3,7 @@ package omwei
 import (
 	"errors"
 	"math/big"
+	"reflect"
 	"strings"
 )
 
@@ -119,7 +120,7 @@ type SunSpecModel103ActivePowerReader interface {
 // call path, so callers cannot accidentally pass W from one read and W_SF from
 // another through this API.
 func ReadAndMapSunSpecModel103ActivePower(reader SunSpecModel103ActivePowerReader, mapping SourceMapping) (ConversionResult, error) {
-	if reader == nil {
+	if reader == nil || (reflect.ValueOf(reader).Kind() == reflect.Ptr && reflect.ValueOf(reader).IsNil()) {
 		return ConversionResult{}, ErrSourceIdentityMismatch
 	}
 	source, modelID, wRegister, wSFRegister, snapshotID, err := reader.ReadModel103ActivePowerRegisters()
