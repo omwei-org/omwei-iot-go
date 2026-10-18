@@ -12,7 +12,6 @@ type sourceMappingInteropDocument struct {
 	SchemaVersion string `json:"schema_version"`
 	Cases []struct {
 		Name string `json:"name"`
-		MappingIndex int `json:"mapping_index"`
 		Sample SourceSample `json:"sample"`
 		ExpectedWireHex string `json:"expected_wire_hex"`
 		ExpectedError string `json:"expected_error"`
@@ -35,10 +34,22 @@ func TestSourceMappingInteropVectors(t *testing.T) {
 
 	for _, tc := range doc.Cases {
 		t.Run(tc.Name, func(t *testing.T) {
-			if tc.MappingIndex < 0 || tc.MappingIndex >= len(profiles.Mappings) {
-				t.Fatalf("mapping_index %d out of range", tc.MappingIndex)
+			var mapping *SourceMapping
+			for i := range profiles.Mappings {
+				if profiles.Mappings[i].Source == tc.Sample.Source {
+					mapping = &profiles.Mappings[i]
+					break
+				}
 			}
-			result, err := MapSourceSample(profiles.Mappings[tc.MappingIndex], tc.Sample)
+			if mapping == nil {
+				if tc.ExpectedError == "source_identity_mismatch" {
+					// A negative vector may intentionally name an unconfigured point.
+					if tc.ExpectedWireHex != "" { t.Fatal("negative vector must not expect wire bytes") }
+					return
+				}
+				t.Fatalf("no profile found for source %+v", tc.Sample.Source)
+			}
+			result, err := MapSourceSample(*mapping, tc.Sample)
 			if tc.ExpectedError != "" {
 				if err == nil { t.Fatal("expected mapping error, got nil") }
 				switch tc.ExpectedError {
