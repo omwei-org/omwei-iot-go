@@ -161,6 +161,10 @@ func TestReadAndMapSunSpecModel103ActivePower(t *testing.T) {
 	if _, err := ReadAndMapSunSpecModel103ActivePower(nil, mapping); !errors.Is(err, ErrSourceIdentityMismatch) {
 		t.Fatalf("nil reader: want identity rejection, got %v", err)
 	}
+	var typedNilReader *fakeSunSpec103Reader
+	if _, err := ReadAndMapSunSpecModel103ActivePower(typedNilReader, mapping); !errors.Is(err, ErrSourceIdentityMismatch) {
+		t.Fatalf("typed nil reader: want identity rejection, got %v", err)
+	}
 	transportErr := errors.New("modbus read failed")
 	reader.err = transportErr
 	if _, err := ReadAndMapSunSpecModel103ActivePower(reader, mapping); !errors.Is(err, transportErr) {
