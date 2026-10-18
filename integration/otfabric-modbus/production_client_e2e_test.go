@@ -11,7 +11,7 @@ import (
 	"time"
 
 	omwei "github.com/omwei-org/omwei-iot-go"
-	"github.com/otfabric/modbus"
+	"github.com/otfabric/go-modbus"
 )
 
 // realClientSimulator is intentionally small but speaks ordinary Modbus TCP.
@@ -198,7 +198,6 @@ func TestPinnedOtfabricClientOverLocalModbusTCPToCanonicalWattValue(t *testing.T
 		t.Fatal("expected upstream client to observe a Modbus TCP transaction ID")
 	}
 }
-
 
 // Test the pinned upstream client against a valid Modbus exception response.
 // The TCP/MBAP frame is well-formed; the server rejects the requested function.
