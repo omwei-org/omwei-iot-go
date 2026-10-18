@@ -1,0 +1,75 @@
+{
+  "schema_version": "1",
+  "mappings": [
+    {
+      "source": {
+        "protocol": "modbus",
+        "device": "meter-1",
+        "point": "holding:40001"
+      },
+      "descriptor_id": 69,
+      "source_unit": "register-tenths-of-watt",
+      "canonical_unit": "watt",
+      "scale_numerator": 1,
+      "scale_denominator": 10,
+      "offset_numerator": 0,
+      "offset_denominator": 1
+    },
+    {
+      "source": {
+        "protocol": "sunspec-modbus",
+        "device": "inverter-2",
+        "point": "model:103:W;scale-factor:W_SF"
+      },
+      "descriptor_id": 69,
+      "source_unit": "watt (after W_SF application)",
+      "canonical_unit": "watt",
+      "scale_numerator": 1,
+      "scale_denominator": 1,
+      "offset_numerator": 0,
+      "offset_denominator": 1
+    },
+    {
+      "source": {
+        "protocol": "modbus",
+        "device": "temp-meter-1",
+        "point": "holding:30001"
+      },
+      "descriptor_id": 66,
+      "source_unit": "degree_Celsius",
+      "canonical_unit": "degree_Celsius",
+      "scale_numerator": 1,
+      "scale_denominator": 1,
+      "offset_numerator": 0,
+      "offset_denominator": 1
+    },
+    {
+      "source": {
+        "protocol": "modbus",
+        "device": "temp-meter-1",
+        "point": "holding:30002"
+      },
+      "descriptor_id": 66,
+      "source_unit": "kelvin",
+      "canonical_unit": "degree_Celsius",
+      "scale_numerator": 1,
+      "scale_denominator": 1,
+      "offset_numerator": -27315,
+      "offset_denominator": 100
+    },
+    {
+      "source": {
+        "protocol": "test",
+        "device": "edge-fixture",
+        "point": "test:negative-scale"
+      },
+      "descriptor_id": 66,
+      "source_unit": "degree_Celsius",
+      "canonical_unit": "degree_Celsius",
+      "scale_numerator": -1,
+      "scale_denominator": 1,
+      "offset_numerator": 0,
+      "offset_denominator": 1
+    }
+  ]
+}

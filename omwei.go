@@ -10,6 +10,7 @@ package omwei
 import (
 	"encoding/binary"
 	"errors"
+	"strings"
 )
 
 //go:generate go run ./cmd/omwei-gen -in registry/corpus-v0.1.yaml -out registry_generated.go
@@ -17,37 +18,88 @@ import (
 // AmbientTemperatureID is the descriptor ID of ambient_temperature.
 const AmbientTemperatureID uint16 = 0x0042
 
+// SemanticMapping identifies an exact concept in an external vocabulary.
+type SemanticMapping struct {
+	Vocabulary string
+	Concept    string
+}
+
 // Descriptor is one compiled-in registry entry.
 type Descriptor struct {
-	ID     uint16
-	Label  string
-	Unit   string // canonical unit
-	Scale  int32  // integer multiplier: encoded = round((physical - Offset) * Scale)
-	Offset int32
-	Min    int32 // inclusive bounds on the encoded value
-	Max    int32
+	ID           uint16
+	Label        string
+	Unit         string // canonical unit
+	QuantityKind string
+	Mappings     []SemanticMapping
+	Scale        int32 // integer multiplier: encoded = round((physical - Offset) * Scale)
+	Offset       int32
+	Min          int32 // inclusive bounds on the encoded value
+	Max          int32
 }
 
 // Errors returned by the package. Use errors.Is to test for them.
 var (
-	ErrUnknownDescriptor = errors.New("unknown descriptor")
-	ErrOutOfRange        = errors.New("value outside descriptor constraints")
-	ErrInvalidAtomLength = errors.New("invalid OMWEI atom length")
-	ErrInvalidDecimal    = errors.New("invalid decimal")
+	ErrUnknownDescriptor        = errors.New("unknown descriptor")
+	ErrUnknownExternalMapping   = errors.New("unknown external mapping")
+	ErrAmbiguousExternalMapping = errors.New("ambiguous external mapping")
+	ErrInvalidSourceMapping     = errors.New("invalid source mapping")
+	ErrSourceUnitMismatch       = errors.New("source transform target unit does not match descriptor unit")
+	ErrSourceIdentityMismatch   = errors.New("source sample identity does not match mapping")
+	ErrObservedSourceUnitMismatch = errors.New("source sample unit does not match mapping source unit")
+	ErrOutOfRange               = errors.New("value outside descriptor constraints")
+	ErrInvalidAtomLength        = errors.New("invalid OMWEI atom length")
+	ErrInvalidDecimal           = errors.New("invalid decimal")
 )
+
+// cloneDescriptor prevents callers from mutating the compiled-in registry through
+// the descriptor's slice-valued semantic mappings.
+func cloneDescriptor(d Descriptor) Descriptor {
+	d.Mappings = append([]SemanticMapping(nil), d.Mappings...)
+	return d
+}
 
 // Lookup resolves a descriptor ID against the compiled-in corpus.
 func Lookup(id uint16) (Descriptor, bool) {
 	for _, d := range descriptors {
 		if d.ID == id {
-			return d, true
+			return cloneDescriptor(d), true
 		}
 	}
 	return Descriptor{}, false
 }
 
 // Descriptors returns a copy of the compiled-in corpus in registry order.
-func Descriptors() []Descriptor { return append([]Descriptor(nil), descriptors[:]...) }
+func Descriptors() []Descriptor {
+	out := make([]Descriptor, len(descriptors))
+	for i, d := range descriptors {
+		out[i] = cloneDescriptor(d)
+	}
+	return out
+}
+
+// LookupExternal resolves an exact vocabulary/concept pair; it never infers
+// equivalence or normalizes identifiers across vocabularies.
+func LookupExternal(vocabulary, concept string) (Descriptor, error) {
+	if strings.TrimSpace(vocabulary) == "" || strings.TrimSpace(concept) == "" {
+		return Descriptor{}, ErrUnknownExternalMapping
+	}
+	var found Descriptor
+	matched := false
+	for _, d := range descriptors {
+		for _, m := range d.Mappings {
+			if m.Vocabulary == vocabulary && m.Concept == concept {
+				if matched && found.ID != d.ID {
+					return Descriptor{}, ErrAmbiguousExternalMapping
+				}
+				found, matched = d, true
+			}
+		}
+	}
+	if !matched {
+		return Descriptor{}, ErrUnknownExternalMapping
+	}
+	return cloneDescriptor(found), nil
+}
 
 // Atom is a descriptor ID paired with a value in the descriptor's encoded
 // integer domain. Construct it with NewAtom so the constraints are enforced.

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://omwei.org/schemas/source-mapping-interop-v1.schema.json",
+  "title": "OMWEI source mapping interoperability vectors v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "description", "cases"],
+  "properties": {
+    "schema_version": {"const": "1"},
+    "description": {"type": "string", "minLength": 1},
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "sample"],
+        "properties": {
+          "name": {"type": "string", "minLength": 1},
+          "sample": {"$ref": "#/$defs/sourceSample"},
+          "expected_wire_hex": {"type": "string", "pattern": "^[0-9a-fA-F]{12}$"},
+          "expected_error": {"enum": ["source_identity_mismatch", "observed_source_unit_mismatch", "invalid_decimal", "out_of_range"]},
+          "note": {"type": "string"}
+        },
+        "oneOf": [
+          {"required": ["expected_wire_hex"], "not": {"required": ["expected_error"]}},
+          {"required": ["expected_error"], "not": {"required": ["expected_wire_hex"]}}
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "sourceIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocol", "device", "point"],
+      "properties": {
+        "protocol": {"type": "string", "minLength": 1},
+        "device": {"type": "string", "minLength": 1},
+        "point": {"type": "string", "minLength": 1}
+      }
+    },
+    "sourceSample": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "value", "unit"],
+      "properties": {
+        "source": {"$ref": "#/$defs/sourceIdentity"},
+        "value": {"type": "string", "minLength": 1},
+        "unit": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

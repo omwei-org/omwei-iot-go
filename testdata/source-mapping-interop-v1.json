@@ -1,0 +1,240 @@
+{
+  "schema_version": "1",
+  "description": "Transport-neutral OMWEI source mapping interoperability vectors. Synthetic test data, not captured device telemetry.",
+  "cases": [
+    {
+      "name": "modbus-source-to-active-power",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "meter-1",
+          "point": "holding:40001"
+        },
+        "value": "1230",
+        "unit": "register-tenths-of-watt"
+      },
+      "expected_wire_hex": "00450000007b"
+    },
+    {
+      "name": "sunspec-model-103-w-with-w-sf",
+      "sample": {
+        "source": {
+          "protocol": "sunspec-modbus",
+          "device": "inverter-2",
+          "point": "model:103:W;scale-factor:W_SF"
+        },
+        "value": "123",
+        "unit": "watt (after W_SF application)"
+      },
+      "expected_wire_hex": "00450000007b"
+    },
+    {
+      "name": "reject-unconfigured-source-point",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "meter-1",
+          "point": "holding:40002"
+        },
+        "value": "1230",
+        "unit": "register-tenths-of-watt"
+      },
+      "expected_error": "source_identity_mismatch"
+    },
+    {
+      "name": "reject-unit-mismatch",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "meter-1",
+          "point": "holding:40001"
+        },
+        "value": "1230",
+        "unit": "watt"
+      },
+      "expected_error": "observed_source_unit_mismatch"
+    },
+    {
+      "name": "reject-invalid-decimal",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "meter-1",
+          "point": "holding:40001"
+        },
+        "value": "2e2",
+        "unit": "register-tenths-of-watt"
+      },
+      "expected_error": "invalid_decimal"
+    },
+    {
+      "name": "reject-value-out-of-range",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "meter-1",
+          "point": "holding:40001"
+        },
+        "value": "999999999999999999999999",
+        "unit": "register-tenths-of-watt"
+      },
+      "expected_error": "out_of_range"
+    },
+    {
+      "name": "round-half-away-from-zero-positive",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "temp-meter-1",
+          "point": "holding:30001"
+        },
+        "value": "20.0005",
+        "unit": "degree_Celsius"
+      },
+      "expected_wire_hex": "004200004e21"
+    },
+    {
+      "name": "round-half-away-from-zero-negative",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "temp-meter-1",
+          "point": "holding:30001"
+        },
+        "value": "-0.0005",
+        "unit": "degree_Celsius"
+      },
+      "expected_wire_hex": "0042ffffffff"
+    },
+    {
+      "name": "rational-offset-kelvin-to-celsius",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "temp-meter-1",
+          "point": "holding:30002"
+        },
+        "value": "293.15",
+        "unit": "kelvin"
+      },
+      "expected_wire_hex": "004200004e20"
+    },
+    {
+      "name": "round-below-half-positive",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "temp-meter-1",
+          "point": "holding:30001"
+        },
+        "value": "20.00049",
+        "unit": "degree_Celsius"
+      },
+      "expected_wire_hex": "004200004e20"
+    },
+    {
+      "name": "round-above-half-positive",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "temp-meter-1",
+          "point": "holding:30001"
+        },
+        "value": "20.00051",
+        "unit": "degree_Celsius"
+      },
+      "expected_wire_hex": "004200004e21"
+    },
+    {
+      "name": "round-below-half-negative",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "temp-meter-1",
+          "point": "holding:30001"
+        },
+        "value": "-0.00049",
+        "unit": "degree_Celsius"
+      },
+      "expected_wire_hex": "004200000000"
+    },
+    {
+      "name": "round-above-half-negative",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "temp-meter-1",
+          "point": "holding:30001"
+        },
+        "value": "-0.00051",
+        "unit": "degree_Celsius"
+      },
+      "expected_wire_hex": "0042ffffffff"
+    },
+    {
+      "name": "negative-source-scale",
+      "sample": {
+        "source": {
+          "protocol": "test",
+          "device": "edge-fixture",
+          "point": "test:negative-scale"
+        },
+        "value": "1",
+        "unit": "degree_Celsius"
+      },
+      "expected_wire_hex": "0042fffffc18"
+    },
+    {
+      "name": "temperature-descriptor-min-inclusive",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "temp-meter-1",
+          "point": "holding:30001"
+        },
+        "value": "-80",
+        "unit": "degree_Celsius"
+      },
+      "expected_wire_hex": "0042fffec780"
+    },
+    {
+      "name": "temperature-descriptor-max-inclusive",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "temp-meter-1",
+          "point": "holding:30001"
+        },
+        "value": "150",
+        "unit": "degree_Celsius"
+      },
+      "expected_wire_hex": "0042000249f0"
+    },
+    {
+      "name": "temperature-below-descriptor-min",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "temp-meter-1",
+          "point": "holding:30001"
+        },
+        "value": "-80.001",
+        "unit": "degree_Celsius"
+      },
+      "expected_error": "out_of_range"
+    },
+    {
+      "name": "temperature-above-descriptor-max",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "temp-meter-1",
+          "point": "holding:30001"
+        },
+        "value": "150.001",
+        "unit": "degree_Celsius"
+      },
+      "expected_error": "out_of_range"
+    }
+  ]
+}

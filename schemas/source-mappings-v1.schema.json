@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://omwei.org/schemas/source-mappings-v1.schema.json",
+  "title": "OMWEI source mapping profile document v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "mappings"],
+  "properties": {
+    "schema_version": {"const": "1"},
+    "mappings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/mapping"}
+    }
+  },
+  "$defs": {
+    "sourceIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocol", "device", "point"],
+      "properties": {
+        "protocol": {"type": "string", "minLength": 1},
+        "device": {"type": "string", "minLength": 1},
+        "point": {"type": "string", "minLength": 1}
+      }
+    },
+    "mapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "descriptor_id", "source_unit", "canonical_unit", "scale_numerator", "scale_denominator", "offset_numerator", "offset_denominator"],
+      "properties": {
+        "source": {"$ref": "#/$defs/sourceIdentity"},
+        "descriptor_id": {"type": "integer", "minimum": 0, "maximum": 65535},
+        "source_unit": {"type": "string", "minLength": 1},
+        "canonical_unit": {"type": "string", "minLength": 1},
+        "scale_numerator": {"type": "integer", "minimum": -9223372036854775808, "maximum": 9223372036854775807, "not": {"const": 0}},
+        "scale_denominator": {"type": "integer", "minimum": 1, "maximum": 9223372036854775807},
+        "offset_numerator": {"type": "integer", "minimum": -9223372036854775808, "maximum": 9223372036854775807},
+        "offset_denominator": {"type": "integer", "minimum": 1, "maximum": 9223372036854775807}
+      }
+    }
+  }
+}
