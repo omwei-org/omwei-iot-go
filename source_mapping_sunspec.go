@@ -92,3 +92,28 @@ func MapSunSpecModel103Snapshot(mapping SourceMapping, sample SunSpecModel103Act
 	return MapSunSpecModel103ActivePower(mapping, sample.Source, int64(sample.RawW), sample.WSF)
 }
 
+// SunSpecModel103ActivePowerReader is implemented by the protocol adapter.
+// ReadModel103ActivePower must read W and W_SF from one coherent model
+// acquisition and return a non-empty acquisition ID only after that read
+// succeeds. The interface contract is not itself proof of a transport's
+// implementation; concrete adapters must test that guarantee at their layer.
+type SunSpecModel103ActivePowerReader interface {
+	ReadModel103ActivePower() (source SourceIdentity, modelID uint16, rawW int16, wSF int16, snapshotID string, err error)
+}
+
+// ReadAndMapSunSpecModel103ActivePower keeps acquisition and mapping in one
+// call path, so callers cannot accidentally pass W from one read and W_SF from
+// another through this API.
+func ReadAndMapSunSpecModel103ActivePower(reader SunSpecModel103ActivePowerReader, mapping SourceMapping) (ConversionResult, error) {
+	if reader == nil {
+		return ConversionResult{}, ErrSourceIdentityMismatch
+	}
+	source, modelID, rawW, wSF, snapshotID, err := reader.ReadModel103ActivePower()
+	if err != nil {
+		return ConversionResult{}, err
+	}
+	return MapSunSpecModel103Snapshot(mapping, SunSpecModel103ActivePowerSnapshot{
+		Source: source, ModelID: modelID, RawW: rawW, WSF: wSF, SnapshotID: snapshotID,
+	})
+}
+
