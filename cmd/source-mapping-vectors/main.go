@@ -17,6 +17,7 @@ import (
 
 type vectorDocument struct {
 	SchemaVersion string `json:"schema_version"`
+	Description string `json:"description"`
 	Cases []vectorCase `json:"cases"`
 }
 
