@@ -2,6 +2,7 @@ package omwei
 
 import (
 	"errors"
+	"reflect"
 	"testing"
 )
 
@@ -41,7 +42,36 @@ func TestAmbientTemperatureDescriptorMatchesRegistry(t *testing.T) {
 		t.Fatal(err)
 	}
 	registry, ok := Lookup(AmbientTemperatureID)
-	if !ok || d != registry {
+	if !ok || !reflect.DeepEqual(d, registry) {
 		t.Fatalf("mapping descriptor %+v does not match registry %+v", d, registry)
+	}
+}
+
+
+func TestLookupExternalExactVocabularyAndConcept(t *testing.T) {
+	d, err := LookupExternal("QUDT", "Temperature")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if d.ID != AmbientTemperatureID || d.QuantityKind != "temperature" {
+		t.Fatalf("unexpected external lookup result: %+v", d)
+	}
+	if _, err := LookupExternal("qudt", "Temperature"); !errors.Is(err, ErrUnknownExternalMapping) {
+		t.Fatalf("lookup must be exact; got %v", err)
+	}
+	if _, err := LookupExternal("QUDT", "NotAConcept"); !errors.Is(err, ErrUnknownExternalMapping) {
+		t.Fatalf("want unknown external mapping, got %v", err)
+	}
+}
+
+func TestLookupReturnsIndependentSemanticMappings(t *testing.T) {
+	d, ok := Lookup(AmbientTemperatureID)
+	if !ok {
+		t.Fatal("temperature descriptor missing")
+	}
+	d.Mappings[0].Concept = "Corrupted"
+	again, ok := Lookup(AmbientTemperatureID)
+	if !ok || again.Mappings[0].Concept != "Temperature" {
+		t.Fatalf("caller mutation escaped into registry: %+v", again)
 	}
 }
