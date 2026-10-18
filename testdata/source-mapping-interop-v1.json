@@ -79,6 +79,45 @@
         "unit": "register-tenths-of-watt"
       },
       "expected_error": "out_of_range"
+    },
+    {
+      "name": "round-half-away-from-zero-positive",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "temp-meter-1",
+          "point": "holding:30001"
+        },
+        "value": "20.0005",
+        "unit": "degree_Celsius"
+      },
+      "expected_wire_hex": "004200004e21"
+    },
+    {
+      "name": "round-half-away-from-zero-negative",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "temp-meter-1",
+          "point": "holding:30001"
+        },
+        "value": "-0.0005",
+        "unit": "degree_Celsius"
+      },
+      "expected_wire_hex": "0042ffffffff"
+    },
+    {
+      "name": "rational-offset-kelvin-to-celsius",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "temp-meter-1",
+          "point": "holding:30002"
+        },
+        "value": "293.15",
+        "unit": "kelvin"
+      },
+      "expected_wire_hex": "004200004e20"
     }
   ]
 }
