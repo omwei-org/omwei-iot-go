@@ -112,6 +112,51 @@ The example profile identifies the model point and scale-factor dependency, but
 the caller remains responsible for reading a coherent pair and validating the
 model/point layout against the applicable SunSpec model specification.
 
+## SunSpec Model 103 Modbus adapter (experimental)
+
+The Go package includes a transport interface that matches the register-read
+methods exposed by `github.com/otfabric/modbus`'s `*modbus.Client`, without
+forcing that transport dependency on all users. The integration layer can pass
+its existing client directly to `DiscoverSunSpecModel103Adapter`.
+
+Discovery starts at the configured first **model-header** register (not the
+SunSpec signature/common block) and is bounded by `MaxModels`. The returned
+adapter then reads Model 103's `W` and `W_SF` together in one two-register
+request and can feed that acquisition straight to the EABC mapper:
+
+```go
+source := omwei.SourceIdentity{
+    Protocol: "sunspec-modbus",
+    Device:   provisionedDeviceID, // provisioned out of band
+    Point:    "model:103:W;scale-factor:W_SF",
+}
+adapter, err := omwei.DiscoverSunSpecModel103Adapter(
+    ctx, existingModbusClient, source, unitID, omwei.SunSpecInputRegister,
+    omwei.SunSpecModelDiscoveryConfig{
+        FirstHeaderAddress: firstModelHeaderAddress,
+        MaxModels:           64,
+    },
+)
+if err != nil {
+    return err
+}
+result, err := omwei.ReadAndMapSunSpecModel103ActivePower(adapter, mapping)
+if err != nil {
+    return err
+}
+atom := result.Atom
+_ = atom
+```
+
+Choose `SunSpecInputRegister` or `SunSpecHoldingRegister` according to the
+device's documented register table. Discovery validates the model chain's
+bounds and Model 103's minimum point length; it does not prove the device's
+cryptographic identity or certify that a vendor's register layout matches the
+standard. The snapshot ID labels one successful client-side acquisition; one
+Modbus request does not prove the device updated `W` and `W_SF` atomically.
+Tests use a fake register client, so passing them is not hardware-in-the-loop
+validation.
+
 ## Transport-neutral adapter contract
 
 Protocol adapters should normalize protocol-specific payloads into a
