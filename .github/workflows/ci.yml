@@ -49,6 +49,6 @@ jobs:
           cmp testdata/atom-v1.json rust-src/tests/vectors/atom-v1.json
           cmp testdata/decimal-conversion-v1.json rust-src/tests/vectors/decimal-conversion-v1.json
       - name: Build Rust reference (real crate, full dependencies)
-        run: cargo build --release --manifest-path rustref/Cargo.toml
+        run: cargo build --locked --release --manifest-path rustref/Cargo.toml
       - name: Differential test (200,000 cases)
         run: bash scripts/difftest.sh rustref/target/release/omwei-rustref
