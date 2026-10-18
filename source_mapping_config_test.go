@@ -1,6 +1,7 @@
 package omwei
 
 import (
+	"encoding/json"
 	"errors"
 	"strings"
 	"testing"
@@ -55,15 +56,16 @@ func TestParseSourceMappingDocumentRejectsInvalidDocuments(t *testing.T) {
 }
 
 func TestParseSourceMappingDocumentRejectsDuplicateSourceIdentity(t *testing.T) {
-	one := strings.TrimSpace(validSourceMappingDocument())
-	entryStart := strings.Index(one, `    {`)
-	entryEnd := strings.Index(one[entryStart:], `    }`) + entryStart + len("    }")
-	if entryStart < 0 || entryEnd < len("    }") {
-		t.Fatal("could not isolate fixture mapping")
+	doc, err := ParseSourceMappingDocument([]byte(validSourceMappingDocument()))
+	if err != nil {
+		t.Fatal(err)
 	}
-	entry := one[entryStart:entryEnd]
-	duplicated := strings.Replace(one, entry, entry+",\n"+entry, 1)
-	_, err := ParseSourceMappingDocument([]byte(duplicated))
+	doc.Mappings = append(doc.Mappings, doc.Mappings[0])
+	duplicated, err := json.Marshal(doc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = ParseSourceMappingDocument(duplicated)
 	if !errors.Is(err, ErrDuplicateSourceIdentity) {
 		t.Fatalf("want duplicate source identity, got %v", err)
 	}
