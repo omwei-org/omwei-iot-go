@@ -18,15 +18,23 @@ type Metadata struct {
 	CorpusVersion string
 }
 
+// ExternalMapping identifies a concept in an external vocabulary.
+type ExternalMapping struct {
+	Vocabulary string
+	Concept    string
+}
+
 // Descriptor is one validated registry entry in its runtime (integer) form.
 type Descriptor struct {
-	ID     uint16
-	Label  string
-	Unit   string
-	Scale  int32 // integer multiplier: encoded = round((physical - offset) * Scale)
-	Offset int32
-	Min    int32
-	Max    int32
+	ID           uint16
+	Label        string
+	Unit         string
+	QuantityKind string
+	Mappings     []ExternalMapping
+	Scale        int32 // integer multiplier: encoded = round((physical - offset) * Scale)
+	Offset       int32
+	Min          int32
+	Max          int32
 }
 
 // Corpus is a validated corpus.
@@ -56,13 +64,24 @@ func Parse(yaml string) (*Corpus, error) {
 		hex := str(d, "id")
 		var id uint16
 		fmt.Sscanf(hex[2:], "%x", &id) // validated: exactly 4 hex digits
-		enc, cons := sub("encoding"), sub("constraints")
+		enc, cons, sem := sub("encoding"), sub("constraints"), sub("semantic")
 		scale, err := ExactScaleMultiplier(str(enc, "scale"))
 		if err != nil {
 			return nil, fmt.Errorf("descriptor 0x%04X scale %w", id, err)
 		}
+		var mappings []ExternalMapping
+		if mv, ok := sem.Get("mappings"); ok {
+			for _, item := range mv.([]any) {
+				m := item.(*Map) // validate() has already checked this shape
+				mappings = append(mappings, ExternalMapping{
+					Vocabulary: str(m, "vocabulary"),
+					Concept:    str(m, "concept"),
+				})
+			}
+		}
 		c.Descriptors = append(c.Descriptors, Descriptor{
 			ID: id, Label: str(d, "label"), Unit: str(sub("unit"), "canonical"),
+			QuantityKind: str(sem, "quantity_kind"), Mappings: mappings,
 			Scale: scale, Offset: i64(enc, "offset"), Min: i64(cons, "min"), Max: i64(cons, "max"),
 		})
 	}
