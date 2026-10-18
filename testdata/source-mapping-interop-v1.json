@@ -1,10 +1,9 @@
 {
   "schema_version": "1",
-  "description": "Transport-neutral OMWEI source mapping interop vectors. Synthetic test data, not captured device telemetry.",
+  "description": "Transport-neutral OMWEI source mapping interoperability vectors. Synthetic test data, not captured device telemetry.",
   "cases": [
     {
       "name": "modbus-source-to-active-power",
-      "mapping_index": 0,
       "sample": {
         "source": {"protocol":"modbus","device":"meter-1","point":"holding:40001"},
         "value": "1230",
@@ -14,7 +13,6 @@
     },
     {
       "name": "sunspec-model-103-w-with-w-sf",
-      "mapping_index": 1,
       "sample": {
         "source": {"protocol":"sunspec-modbus","device":"inverter-2","point":"model:103:W;scale-factor:W_SF"},
         "value": "123",
@@ -24,7 +22,6 @@
     },
     {
       "name": "reject-unconfigured-source-point",
-      "mapping_index": 0,
       "sample": {
         "source": {"protocol":"modbus","device":"meter-1","point":"holding:40002"},
         "value": "1230",
@@ -34,7 +31,6 @@
     },
     {
       "name": "reject-unit-mismatch",
-      "mapping_index": 0,
       "sample": {
         "source": {"protocol":"modbus","device":"meter-1","point":"holding:40001"},
         "value": "1230",
