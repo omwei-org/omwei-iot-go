@@ -17,6 +17,7 @@ type localModbusTCPServer struct {
 	listener net.Listener
 	registers map[uint16]uint16
 	unitID uint8
+	responseMode string // test-only fault injection
 	mu sync.Mutex
 	serveErr error
 	wg sync.WaitGroup
@@ -98,19 +99,63 @@ func (s *localModbusTCPServer) serveOne(conn net.Conn) error {
 	if (function != 3 && function != 4) || quantity == 0 || quantity > 125 {
 		return fmt.Errorf("invalid read request function=%d quantity=%d", function, quantity)
 	}
-	response := make([]byte, 9+int(quantity)*2)
-	binary.BigEndian.PutUint16(response[0:2], transactionID)
-	binary.BigEndian.PutUint16(response[2:4], 0)
-	binary.BigEndian.PutUint16(response[4:6], uint16(3+quantity*2))
-	response[6] = unitID
-	response[7] = function
-	response[8] = byte(quantity * 2)
 	s.mu.Lock()
+	mode := s.responseMode
+	values := make([]uint16, quantity)
 	for i := uint16(0); i < quantity; i++ {
-		value := s.registers[start+i]
-		binary.BigEndian.PutUint16(response[9+int(i)*2:11+int(i)*2], value)
+		values[i] = s.registers[start+i]
 	}
 	s.mu.Unlock()
+
+	if mode == "exception" || mode == "short_exception" {
+		response := make([]byte, 9)
+		binary.BigEndian.PutUint16(response[0:2], transactionID)
+		binary.BigEndian.PutUint16(response[2:4], 0)
+		binary.BigEndian.PutUint16(response[4:6], 3)
+		response[6] = unitID
+		response[7] = function | 0x80
+		response[8] = 2
+		if mode == "short_exception" {
+			binary.BigEndian.PutUint16(response[4:6], 2)
+			response = response[:8]
+		}
+		_, err := conn.Write(response)
+		return err
+	}
+
+	response := make([]byte, 9+int(quantity)*2)
+	responseTransactionID := transactionID
+	responseUnitID := unitID
+	responseFunction := function
+	byteCount := byte(quantity * 2)
+	if mode == "wrong_transaction" {
+		responseTransactionID++
+	}
+	if mode == "wrong_unit" {
+		responseUnitID++
+	}
+	if mode == "wrong_function" {
+		responseFunction = function ^ 1
+	}
+	if mode == "wrong_byte_count" {
+		byteCount--
+	}
+	lengthField := uint16(3 + quantity*2)
+	if mode == "invalid_mbap_length" {
+		lengthField = 2
+		response = response[:8]
+	}
+	binary.BigEndian.PutUint16(response[0:2], responseTransactionID)
+	binary.BigEndian.PutUint16(response[2:4], 0)
+	binary.BigEndian.PutUint16(response[4:6], lengthField)
+	response[6] = responseUnitID
+	response[7] = responseFunction
+	response[8] = byteCount
+	for i, value := range values {
+		if 9+i*2+2 <= len(response) {
+			binary.BigEndian.PutUint16(response[9+i*2:11+i*2], value)
+		}
+	}
 	_, err := conn.Write(response)
 	return err
 }
@@ -209,5 +254,40 @@ func TestSunSpecModel103OverLocalModbusTCPToEABCAtom(t *testing.T) {
 	}
 	if result.Atom.CanonicalValue != 123 {
 		t.Fatalf("want 123 W from simulated raw W=1234 and W_SF=-1, got %d", result.Atom.CanonicalValue)
+	}
+}
+
+
+// Test malformed and exceptional responses at the actual TCP framing layer.
+// Every case must return an error rather than accepting the sample or panicking.
+func TestLocalModbusTCPClientRejectsMalformedResponses(t *testing.T) {
+	modes := []string{
+		"exception",
+		"short_exception",
+		"wrong_transaction",
+		"wrong_unit",
+		"wrong_function",
+		"wrong_byte_count",
+		"invalid_mbap_length",
+	}
+	for _, mode := range modes {
+		t.Run(mode, func(t *testing.T) {
+			server := startLocalModbusTCPServer(t)
+			server.responseMode = mode
+			client := &localModbusTCPClient{address: server.address()}
+			_, err := client.ReadInputRegisters(context.Background(), 7, 114, 2)
+			if err == nil {
+				t.Fatalf("expected error for injected response fault %q", mode)
+			}
+		})
+	}
+}
+
+func TestLocalModbusTCPClientRejectsWrongUnitIDRequest(t *testing.T) {
+	server := startLocalModbusTCPServer(t)
+	client := &localModbusTCPClient{address: server.address()}
+	_, err := client.ReadInputRegisters(context.Background(), 8, 114, 2)
+	if err == nil {
+		t.Fatal("expected an error when server rejects the wrong Unit ID")
 	}
 }
