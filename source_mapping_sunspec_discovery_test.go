@@ -89,6 +89,7 @@ func TestDiscoverSunSpecModel103AdapterUsesDiscoveredAddress(t *testing.T) {
 	client := &fakeSunSpecDiscoveryClient{responses: [][]uint16{
 		{103, 14},
 		{1234, 0xffff},
+		{1234, 0xffff},
 	}}
 	source := SourceIdentity{Protocol: "sunspec-modbus", Device: "inverter-7", Point: "model:103:W;scale-factor:W_SF"}
 	adapter, err := DiscoverSunSpecModel103Adapter(context.Background(), client, source, 7, SunSpecInputRegister,
@@ -109,5 +110,23 @@ func TestDiscoverSunSpecModel103AdapterUsesDiscoveredAddress(t *testing.T) {
 	if len(client.addrs) != 2 || client.addrs[0] != 200 || client.addrs[1] != 214 ||
 		client.quantities[0] != 2 || client.quantities[1] != 2 {
 		t.Fatalf("unexpected discovery/read requests: addresses=%v quantities=%v", client.addrs, client.quantities)
+	}
+
+	// Exercise the full path from discovered Modbus registers to canonical EABC atom.
+	mapping := SourceMapping{
+		Source: source, DescriptorID: 69,
+		SourceUnit: "watt (after W_SF application)", CanonicalUnit: "watt",
+		ScaleNumerator: 1, ScaleDenominator: 1,
+		OffsetNumerator: 0, OffsetDenominator: 1,
+	}
+	result, err := ReadAndMapSunSpecModel103ActivePower(adapter, mapping)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Atom.CanonicalValue != 123 {
+		t.Fatalf("want 123 W after W_SF=-1, got %d", result.Atom.CanonicalValue)
+	}
+	if len(client.addrs) != 3 || client.addrs[2] != 214 || client.quantities[2] != 2 {
+		t.Fatalf("unexpected end-to-end read requests: addresses=%v quantities=%v", client.addrs, client.quantities)
 	}
 }
