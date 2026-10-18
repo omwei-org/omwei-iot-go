@@ -9,10 +9,10 @@ const (
 )
 
 var descriptors = [...]Descriptor{
-	{ID: 0x0042, Label: "ambient_temperature", Unit: "degree_Celsius", Scale: 1000, Offset: 0, Min: -80000, Max: 150000},
-	{ID: 0x0043, Label: "relative_humidity", Unit: "percent", Scale: 1000, Offset: 0, Min: 0, Max: 100000},
-	{ID: 0x0044, Label: "atmospheric_pressure", Unit: "pascal", Scale: 1, Offset: 0, Min: 0, Max: 200000},
-	{ID: 0x0045, Label: "active_power", Unit: "watt", Scale: 1, Offset: 0, Min: 0, Max: 100000000},
-	{ID: 0x0046, Label: "vibration_rms", Unit: "millimeter_per_second", Scale: 1000, Offset: 0, Min: 0, Max: 1000000},
-	{ID: 0x0047, Label: "methane_concentration", Unit: "part_per_million", Scale: 1, Offset: 0, Min: 0, Max: 1000000},
+	{ID: 0x0042, Label: "ambient_temperature", Unit: "degree_Celsius", QuantityKind: "temperature", Mappings: []SemanticMapping{{Vocabulary: "QUDT", Concept: "Temperature"}}, Scale: 1000, Offset: 0, Min: -80000, Max: 150000},
+	{ID: 0x0043, Label: "relative_humidity", Unit: "percent", QuantityKind: "relative_humidity", Mappings: []SemanticMapping{{Vocabulary: "QUDT", Concept: "RelativeHumidity"}}, Scale: 1000, Offset: 0, Min: 0, Max: 100000},
+	{ID: 0x0044, Label: "atmospheric_pressure", Unit: "pascal", QuantityKind: "pressure", Mappings: []SemanticMapping{{Vocabulary: "QUDT", Concept: "Pressure"}}, Scale: 1, Offset: 0, Min: 0, Max: 200000},
+	{ID: 0x0045, Label: "active_power", Unit: "watt", QuantityKind: "power", Mappings: []SemanticMapping{{Vocabulary: "QUDT", Concept: "Power"}}, Scale: 1, Offset: 0, Min: 0, Max: 100000000},
+	{ID: 0x0046, Label: "vibration_rms", Unit: "millimeter_per_second", QuantityKind: "vibration_velocity", Mappings: []SemanticMapping{{Vocabulary: "QUDT", Concept: "Velocity"}}, Scale: 1000, Offset: 0, Min: 0, Max: 1000000},
+	{ID: 0x0047, Label: "methane_concentration", Unit: "part_per_million", QuantityKind: "mole_fraction", Mappings: []SemanticMapping{{Vocabulary: "QUDT", Concept: "MoleFraction"}}, Scale: 1, Offset: 0, Min: 0, Max: 1000000},
 }
