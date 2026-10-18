@@ -1,0 +1,142 @@
+registry_id: org.omwei.core
+schema_version: "1"
+corpus_version: "0.1.0"
+version: 0.1
+descriptors:
+  - id: "0x0042"
+    namespace: core
+    status: active
+    version: 1
+    label: ambient_temperature
+    semantic:
+      quantity_kind: temperature
+      mappings:
+        - vocabulary: QUDT
+          concept: Temperature
+    unit:
+      system: SI
+      canonical: degree_Celsius
+    encoding:
+      datatype: int32
+      signed: true
+      byte_order: big_endian
+      scale: "0.001"
+      offset: 0
+    constraints:
+      min: -80000
+      max: 150000
+
+  - id: "0x0043"
+    namespace: core
+    status: active
+    version: 1
+    label: relative_humidity
+    semantic:
+      quantity_kind: relative_humidity
+      mappings:
+        - vocabulary: QUDT
+          concept: RelativeHumidity
+    unit:
+      system: SI
+      canonical: percent
+    encoding:
+      datatype: int32
+      signed: true
+      byte_order: big_endian
+      scale: "0.001"
+      offset: 0
+    constraints:
+      min: 0
+      max: 100000
+
+  - id: "0x0044"
+    namespace: core
+    status: active
+    version: 1
+    label: atmospheric_pressure
+    semantic:
+      quantity_kind: pressure
+      mappings:
+        - vocabulary: QUDT
+          concept: Pressure
+    unit:
+      system: SI
+      canonical: pascal
+    encoding:
+      datatype: int32
+      signed: true
+      byte_order: big_endian
+      scale: "1"
+      offset: 0
+    constraints:
+      min: 0
+      max: 200000
+
+  - id: "0x0045"
+    namespace: core
+    status: active
+    version: 1
+    label: active_power
+    semantic:
+      quantity_kind: power
+      mappings:
+        - vocabulary: QUDT
+          concept: Power
+    unit:
+      system: SI
+      canonical: watt
+    encoding:
+      datatype: int32
+      signed: true
+      byte_order: big_endian
+      scale: "1"
+      offset: 0
+    constraints:
+      min: 0
+      max: 100000000
+
+  - id: "0x0046"
+    namespace: core
+    status: active
+    version: 1
+    label: vibration_rms
+    semantic:
+      quantity_kind: vibration_velocity
+      mappings:
+        - vocabulary: QUDT
+          concept: Velocity
+    unit:
+      system: SI
+      canonical: millimeter_per_second
+    encoding:
+      datatype: int32
+      signed: true
+      byte_order: big_endian
+      scale: "0.001"
+      offset: 0
+    constraints:
+      min: 0
+      max: 1000000
+
+  - id: "0x0047"
+    namespace: core
+    status: active
+    version: 1
+    label: methane_concentration
+    semantic:
+      quantity_kind: mole_fraction
+      mappings:
+        - vocabulary: QUDT
+          concept: MoleFraction
+    unit:
+      system: SI
+      canonical: part_per_million
+    encoding:
+      datatype: int32
+      signed: true
+      byte_order: big_endian
+      scale: "1"
+      offset: 0
+    constraints:
+      min: 0
+      max: 1000000

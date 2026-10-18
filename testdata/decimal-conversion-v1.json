@@ -1,0 +1,183 @@
+{
+  "vector_set": "omwei-iot-decimal-conversion-v1",
+  "status": "draft",
+  "rule": "Parse base-10 decimal exactly; multiply (value - physical_offset) by descriptor integer scale multiplier; round to nearest integer with exact ties away from zero; reject values whose rounded integer is outside descriptor constraints.",
+  "valid": [
+    {
+      "name": "temperature-integer",
+      "descriptor_id": "0x0042",
+      "input": "22.5",
+      "encoded_value": 22500
+    },
+    {
+      "name": "temperature-trailing-zero",
+      "descriptor_id": "0x0042",
+      "input": "22.500",
+      "encoded_value": 22500
+    },
+    {
+      "name": "temperature-positive-halfway-away-from-zero",
+      "descriptor_id": "0x0042",
+      "input": "0.0005",
+      "encoded_value": 1
+    },
+    {
+      "name": "temperature-negative-half-away",
+      "descriptor_id": "0x0042",
+      "input": "-0.0005",
+      "encoded_value": -1
+    },
+    {
+      "name": "temperature-positive-halfway-away-from-zero-offset",
+      "descriptor_id": "0x0042",
+      "input": "22.5005",
+      "encoded_value": 22501
+    },
+    {
+      "name": "temperature-negative-halfway-away-from-zero",
+      "descriptor_id": "0x0042",
+      "input": "-22.5005",
+      "encoded_value": -22501
+    },
+    {
+      "name": "temperature-minimum",
+      "descriptor_id": "0x0042",
+      "input": "-80",
+      "encoded_value": -80000
+    },
+    {
+      "name": "temperature-maximum",
+      "descriptor_id": "0x0042",
+      "input": "150",
+      "encoded_value": 150000
+    },
+    {
+      "name": "humidity-decimal",
+      "descriptor_id": "0x0043",
+      "input": "55.125",
+      "encoded_value": 55125
+    },
+    {
+      "name": "pressure-integer",
+      "descriptor_id": "0x0044",
+      "input": "101325",
+      "encoded_value": 101325
+    },
+    {
+      "name": "power-integer",
+      "descriptor_id": "0x0045",
+      "input": "1250",
+      "encoded_value": 1250
+    },
+    {
+      "name": "vibration-decimal",
+      "descriptor_id": "0x0046",
+      "input": "12.345",
+      "encoded_value": 12345
+    },
+    {
+      "name": "methane-integer",
+      "descriptor_id": "0x0047",
+      "input": "850",
+      "encoded_value": 850
+    }
+  ],
+  "invalid": [
+    {
+      "name": "below-min-after-rounding",
+      "descriptor_id": "0x0042",
+      "input": "-80.0005",
+      "reason": "value_out_of_range"
+    },
+    {
+      "name": "above-max-after-rounding",
+      "descriptor_id": "0x0042",
+      "input": "150.0005",
+      "reason": "value_out_of_range"
+    },
+    {
+      "name": "exponent-notation",
+      "descriptor_id": "0x0042",
+      "input": "1e2",
+      "reason": "invalid_decimal"
+    },
+    {
+      "name": "too-many-fraction-digits",
+      "descriptor_id": "0x0042",
+      "input": "1.0000000000000000001",
+      "reason": "invalid_decimal"
+    },
+    {
+      "name": "empty",
+      "descriptor_id": "0x0042",
+      "input": "",
+      "reason": "invalid_decimal"
+    },
+    {
+      "name": "sign-only-plus",
+      "descriptor_id": "0x0042",
+      "input": "+",
+      "reason": "invalid_decimal"
+    },
+    {
+      "name": "sign-only-minus",
+      "descriptor_id": "0x0042",
+      "input": "-",
+      "reason": "invalid_decimal"
+    },
+    {
+      "name": "missing-integer-part",
+      "descriptor_id": "0x0042",
+      "input": ".5",
+      "reason": "invalid_decimal"
+    },
+    {
+      "name": "empty-fraction",
+      "descriptor_id": "0x0042",
+      "input": "1.",
+      "reason": "invalid_decimal"
+    },
+    {
+      "name": "multiple-decimal-points",
+      "descriptor_id": "0x0042",
+      "input": "1.2.3",
+      "reason": "invalid_decimal"
+    },
+    {
+      "name": "unknown-descriptor",
+      "descriptor_id": "0xffff",
+      "input": "1",
+      "reason": "unknown_descriptor"
+    },
+    {
+      "name": "humidity-below-minimum",
+      "descriptor_id": "0x0043",
+      "input": "-0.001",
+      "reason": "value_out_of_range"
+    },
+    {
+      "name": "pressure-above-maximum",
+      "descriptor_id": "0x0044",
+      "input": "200001",
+      "reason": "value_out_of_range"
+    },
+    {
+      "name": "power-above-maximum",
+      "descriptor_id": "0x0045",
+      "input": "100000001",
+      "reason": "value_out_of_range"
+    },
+    {
+      "name": "vibration-below-minimum",
+      "descriptor_id": "0x0046",
+      "input": "-0.001",
+      "reason": "value_out_of_range"
+    },
+    {
+      "name": "methane-above-maximum",
+      "descriptor_id": "0x0047",
+      "input": "1000001",
+      "reason": "value_out_of_range"
+    }
+  ]
+}

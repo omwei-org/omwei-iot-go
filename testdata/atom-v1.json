@@ -1,0 +1,260 @@
+{
+  "vector_set": "omwei-iot-atom-v1",
+  "status": "draft",
+  "encoding": {
+    "atom_bytes": 6,
+    "descriptor_id": "uint16 big-endian",
+    "encoded_value": "int32 two's-complement big-endian",
+    "value_domain": "encoded integer; external-unit conversion is not tested here"
+  },
+  "valid": [
+    {
+      "name": "ambient-temperature-22_500",
+      "descriptor_id": "0x0042",
+      "label": "ambient_temperature",
+      "unit": "degree_Celsius",
+      "encoded_value": 22500,
+      "bytes_hex": "0042000057e4"
+    },
+    {
+      "name": "relative-humidity-55_500",
+      "descriptor_id": "0x0043",
+      "label": "relative_humidity",
+      "unit": "percent",
+      "encoded_value": 55500,
+      "bytes_hex": "00430000d8cc"
+    },
+    {
+      "name": "atmospheric-pressure-101325",
+      "descriptor_id": "0x0044",
+      "label": "atmospheric_pressure",
+      "unit": "pascal",
+      "encoded_value": 101325,
+      "bytes_hex": "004400018bcd"
+    },
+    {
+      "name": "active-power-1250",
+      "descriptor_id": "0x0045",
+      "label": "active_power",
+      "unit": "watt",
+      "encoded_value": 1250,
+      "bytes_hex": "0045000004e2"
+    },
+    {
+      "name": "vibration-rms-12_345",
+      "descriptor_id": "0x0046",
+      "label": "vibration_rms",
+      "unit": "millimeter_per_second",
+      "encoded_value": 12345,
+      "bytes_hex": "004600003039"
+    },
+    {
+      "name": "methane-concentration-850",
+      "descriptor_id": "0x0047",
+      "label": "methane_concentration",
+      "unit": "part_per_million",
+      "encoded_value": 850,
+      "bytes_hex": "004700000352"
+    },
+    {
+      "name": "ambient_temperature-min",
+      "descriptor_id": "0x0042",
+      "label": "ambient_temperature",
+      "unit": "degree_Celsius",
+      "encoded_value": -80000,
+      "bytes_hex": "0042fffec780"
+    },
+    {
+      "name": "ambient_temperature-max",
+      "descriptor_id": "0x0042",
+      "label": "ambient_temperature",
+      "unit": "degree_Celsius",
+      "encoded_value": 150000,
+      "bytes_hex": "0042000249f0"
+    },
+    {
+      "name": "relative_humidity-min",
+      "descriptor_id": "0x0043",
+      "label": "relative_humidity",
+      "unit": "percent",
+      "encoded_value": 0,
+      "bytes_hex": "004300000000"
+    },
+    {
+      "name": "relative_humidity-max",
+      "descriptor_id": "0x0043",
+      "label": "relative_humidity",
+      "unit": "percent",
+      "encoded_value": 100000,
+      "bytes_hex": "0043000186a0"
+    },
+    {
+      "name": "atmospheric_pressure-min",
+      "descriptor_id": "0x0044",
+      "label": "atmospheric_pressure",
+      "unit": "pascal",
+      "encoded_value": 0,
+      "bytes_hex": "004400000000"
+    },
+    {
+      "name": "atmospheric_pressure-max",
+      "descriptor_id": "0x0044",
+      "label": "atmospheric_pressure",
+      "unit": "pascal",
+      "encoded_value": 200000,
+      "bytes_hex": "004400030d40"
+    },
+    {
+      "name": "active_power-min",
+      "descriptor_id": "0x0045",
+      "label": "active_power",
+      "unit": "watt",
+      "encoded_value": 0,
+      "bytes_hex": "004500000000"
+    },
+    {
+      "name": "active_power-max",
+      "descriptor_id": "0x0045",
+      "label": "active_power",
+      "unit": "watt",
+      "encoded_value": 100000000,
+      "bytes_hex": "004505f5e100"
+    },
+    {
+      "name": "vibration_rms-min",
+      "descriptor_id": "0x0046",
+      "label": "vibration_rms",
+      "unit": "millimeter_per_second",
+      "encoded_value": 0,
+      "bytes_hex": "004600000000"
+    },
+    {
+      "name": "vibration_rms-max",
+      "descriptor_id": "0x0046",
+      "label": "vibration_rms",
+      "unit": "millimeter_per_second",
+      "encoded_value": 1000000,
+      "bytes_hex": "0046000f4240"
+    },
+    {
+      "name": "methane_concentration-min",
+      "descriptor_id": "0x0047",
+      "label": "methane_concentration",
+      "unit": "part_per_million",
+      "encoded_value": 0,
+      "bytes_hex": "004700000000"
+    },
+    {
+      "name": "methane_concentration-max",
+      "descriptor_id": "0x0047",
+      "label": "methane_concentration",
+      "unit": "part_per_million",
+      "encoded_value": 1000000,
+      "bytes_hex": "0047000f4240"
+    }
+  ],
+  "invalid": [
+    {
+      "name": "unknown-descriptor",
+      "descriptor_id": "0xffff",
+      "encoded_value": 1,
+      "reason": "unknown_descriptor"
+    },
+    {
+      "name": "temperature-below-minimum",
+      "descriptor_id": "0x0042",
+      "encoded_value": -80001,
+      "reason": "value_out_of_range"
+    },
+    {
+      "name": "temperature-above-maximum",
+      "descriptor_id": "0x0042",
+      "encoded_value": 150001,
+      "reason": "value_out_of_range"
+    },
+    {
+      "name": "humidity-below-minimum",
+      "descriptor_id": "0x0043",
+      "encoded_value": -1,
+      "reason": "value_out_of_range"
+    },
+    {
+      "name": "humidity-above-maximum",
+      "descriptor_id": "0x0043",
+      "encoded_value": 100001,
+      "reason": "value_out_of_range"
+    },
+    {
+      "name": "ambient_temperature-below-min",
+      "descriptor_id": "0x0042",
+      "encoded_value": -80001,
+      "reason": "value_out_of_range"
+    },
+    {
+      "name": "ambient_temperature-above-max",
+      "descriptor_id": "0x0042",
+      "encoded_value": 150001,
+      "reason": "value_out_of_range"
+    },
+    {
+      "name": "relative_humidity-below-min",
+      "descriptor_id": "0x0043",
+      "encoded_value": -1,
+      "reason": "value_out_of_range"
+    },
+    {
+      "name": "relative_humidity-above-max",
+      "descriptor_id": "0x0043",
+      "encoded_value": 100001,
+      "reason": "value_out_of_range"
+    },
+    {
+      "name": "atmospheric_pressure-below-min",
+      "descriptor_id": "0x0044",
+      "encoded_value": -1,
+      "reason": "value_out_of_range"
+    },
+    {
+      "name": "atmospheric_pressure-above-max",
+      "descriptor_id": "0x0044",
+      "encoded_value": 200001,
+      "reason": "value_out_of_range"
+    },
+    {
+      "name": "active_power-below-min",
+      "descriptor_id": "0x0045",
+      "encoded_value": -1,
+      "reason": "value_out_of_range"
+    },
+    {
+      "name": "active_power-above-max",
+      "descriptor_id": "0x0045",
+      "encoded_value": 100000001,
+      "reason": "value_out_of_range"
+    },
+    {
+      "name": "vibration_rms-below-min",
+      "descriptor_id": "0x0046",
+      "encoded_value": -1,
+      "reason": "value_out_of_range"
+    },
+    {
+      "name": "vibration_rms-above-max",
+      "descriptor_id": "0x0046",
+      "encoded_value": 1000001,
+      "reason": "value_out_of_range"
+    },
+    {
+      "name": "methane_concentration-below-min",
+      "descriptor_id": "0x0047",
+      "encoded_value": -1,
+      "reason": "value_out_of_range"
+    },
+    {
+      "name": "methane_concentration-above-max",
+      "descriptor_id": "0x0047",
+      "encoded_value": 1000001,
+      "reason": "value_out_of_range"
+    }
+  ]
+}
