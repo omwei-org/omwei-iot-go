@@ -5,7 +5,11 @@
     {
       "name": "modbus-source-to-active-power",
       "sample": {
-        "source": {"protocol":"modbus","device":"meter-1","point":"holding:40001"},
+        "source": {
+          "protocol": "modbus",
+          "device": "meter-1",
+          "point": "holding:40001"
+        },
         "value": "1230",
         "unit": "register-tenths-of-watt"
       },
@@ -14,7 +18,11 @@
     {
       "name": "sunspec-model-103-w-with-w-sf",
       "sample": {
-        "source": {"protocol":"sunspec-modbus","device":"inverter-2","point":"model:103:W;scale-factor:W_SF"},
+        "source": {
+          "protocol": "sunspec-modbus",
+          "device": "inverter-2",
+          "point": "model:103:W;scale-factor:W_SF"
+        },
         "value": "123",
         "unit": "watt (after W_SF application)"
       },
@@ -23,7 +31,11 @@
     {
       "name": "reject-unconfigured-source-point",
       "sample": {
-        "source": {"protocol":"modbus","device":"meter-1","point":"holding:40002"},
+        "source": {
+          "protocol": "modbus",
+          "device": "meter-1",
+          "point": "holding:40002"
+        },
         "value": "1230",
         "unit": "register-tenths-of-watt"
       },
@@ -32,11 +44,41 @@
     {
       "name": "reject-unit-mismatch",
       "sample": {
-        "source": {"protocol":"modbus","device":"meter-1","point":"holding:40001"},
+        "source": {
+          "protocol": "modbus",
+          "device": "meter-1",
+          "point": "holding:40001"
+        },
         "value": "1230",
         "unit": "watt"
       },
       "expected_error": "observed_source_unit_mismatch"
+    },
+    {
+      "name": "reject-invalid-decimal",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "meter-1",
+          "point": "holding:40001"
+        },
+        "value": "2e2",
+        "unit": "register-tenths-of-watt"
+      },
+      "expected_error": "invalid_decimal"
+    },
+    {
+      "name": "reject-value-out-of-range",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "meter-1",
+          "point": "holding:40001"
+        },
+        "value": "999999999999999999999999",
+        "unit": "register-tenths-of-watt"
+      },
+      "expected_error": "out_of_range"
     }
   ]
 }
