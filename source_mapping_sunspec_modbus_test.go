@@ -5,7 +5,6 @@ import (
 	"errors"
 	"testing"
 
-	modbus "github.com/otfabric/modbus"
 )
 
 type fakeModel103ModbusClient struct {
@@ -13,13 +12,18 @@ type fakeModel103ModbusClient struct {
 	gotUnit uint8
 	gotAddr uint16
 	gotQuantity uint16
-	gotType modbus.RegType
+	gotInput bool
 	registers []uint16
 	err error
 }
 
-func (f *fakeModel103ModbusClient) ReadRegisters(ctx context.Context, unit uint8, addr uint16, quantity uint16, regType modbus.RegType) ([]uint16, error) {
-	f.gotCtx, f.gotUnit, f.gotAddr, f.gotQuantity, f.gotType = ctx, unit, addr, quantity, regType
+func (f *fakeModel103ModbusClient) ReadHoldingRegisters(ctx context.Context, unit uint8, addr uint16, quantity uint16) ([]uint16, error) {
+	f.gotCtx, f.gotUnit, f.gotAddr, f.gotQuantity, f.gotInput = ctx, unit, addr, quantity, false
+	return f.registers, f.err
+}
+
+func (f *fakeModel103ModbusClient) ReadInputRegisters(ctx context.Context, unit uint8, addr uint16, quantity uint16) ([]uint16, error) {
+	f.gotCtx, f.gotUnit, f.gotAddr, f.gotQuantity, f.gotInput = ctx, unit, addr, quantity, true
 	return f.registers, f.err
 }
 
@@ -27,7 +31,7 @@ func validModel103Adapter(client SunSpecModel103RegisterClient) *SunSpecModel103
 	return &SunSpecModel103ModbusAdapter{
 		Client: client,
 		Source: SourceIdentity{Protocol: "sunspec-modbus", Device: "inverter-1", Point: "model:103:W;scale-factor:W_SF"},
-		UnitID: 7, RegisterType: modbus.InputRegister, ModelID: 103, ModelLength: 14, ModelStartAddress: 40010,
+		UnitID: 7, RegisterType: SunSpecInputRegister, ModelID: 103, ModelLength: 14, ModelStartAddress: 40010,
 	}
 }
 
@@ -45,7 +49,7 @@ func TestSunSpecModel103ModbusAdapterReadsWAndScaleFactorTogether(t *testing.T) 
 	if source != adapter.Source || modelID != 103 || w != 1234 || sf != 0xffff || snapshot == "" {
 		t.Fatalf("unexpected snapshot: source=%+v model=%d W=%d SF=%d id=%q", source, modelID, w, sf, snapshot)
 	}
-	if client.gotCtx != ctx || client.gotUnit != 7 || client.gotAddr != 40022 || client.gotQuantity != 2 || client.gotType != modbus.InputRegister {
+	if client.gotCtx != ctx || client.gotUnit != 7 || client.gotAddr != 40022 || client.gotQuantity != 2 || !client.gotInput {
 		t.Fatalf("wrong Modbus request: ctx=%v unit=%d addr=%d quantity=%d type=%v", client.gotCtx, client.gotUnit, client.gotAddr, client.gotQuantity, client.gotType)
 	}
 }
