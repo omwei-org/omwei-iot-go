@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	omwei "github.com/omwei-org/omwei-iot-go"
-	"github.com/otfabric/modbus"
+	"github.com/otfabric/go-modbus"
 )
 
 // Compile-time contract: the pinned upstream client's public methods must
