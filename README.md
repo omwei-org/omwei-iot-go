@@ -148,6 +148,21 @@ atom := result.Atom
 _ = atom
 ```
 
+The nested integration module also runs an end-to-end test with the pinned
+`otfabric/modbus` client connected to a local synthetic Modbus TCP server.
+It exercises the upstream client's `Open`, input-register reads, transaction
+handling, Model 103 discovery and EABC mapping, expecting 123 W from W=1234
+and W_SF=-1. Run the integration tests with:
+
+```sh
+cd integration/otfabric-modbus
+go mod tidy
+go test ./... -count=1
+```
+
+This is transport-level integration against a deterministic simulator, not
+hardware-in-the-loop validation or certification of a particular inverter.
+
 The optional production-client contract check lives in a nested module
 so the core library remains dependency-free. It pins
 `github.com/otfabric/modbus v1.0.0` (Go 1.21-compatible) and verifies at
