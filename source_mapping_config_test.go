@@ -85,11 +85,15 @@ func TestShippedSourceMappingExample(t *testing.T) {
 	if len(doc.Mappings) != 2 {
 		t.Fatalf("want two independent example profiles, got %d", len(doc.Mappings))
 	}
-	modbus, err := MapSourceValue(doc.Mappings[0], "225")
+	modbus, err := MapSourceValue(doc.Mappings[0], "1230")
 	if err != nil {
 		t.Fatal(err)
 	}
-	sunspec, err := MapSourceValue(doc.Mappings[1], "22.5")
+	sunspecEngineeringValue, err := DecodeSunSpecScaledInteger(123, 0) // W=123, W_SF=0
+	if err != nil {
+		t.Fatal(err)
+	}
+	sunspec, err := MapSourceValue(doc.Mappings[1], sunspecEngineeringValue)
 	if err != nil {
 		t.Fatal(err)
 	}
