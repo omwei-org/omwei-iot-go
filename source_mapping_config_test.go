@@ -82,10 +82,21 @@ func TestShippedSourceMappingExample(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(doc.Mappings) != 2 {
-		t.Fatalf("want two independent example profiles, got %d", len(doc.Mappings))
+	var modbusProfile, sunspecProfile *SourceMapping
+	for i := range doc.Mappings {
+		switch doc.Mappings[i].Source.Protocol {
+		case "modbus":
+			if doc.Mappings[i].Source.Device == "meter-1" {
+				modbusProfile = &doc.Mappings[i]
+			}
+		case "sunspec-modbus":
+			sunspecProfile = &doc.Mappings[i]
+		}
 	}
-	modbus, err := MapSourceValue(doc.Mappings[0], "1230")
+	if modbusProfile == nil || sunspecProfile == nil {
+		t.Fatalf("want independent Modbus and SunSpec example profiles, got %d profiles", len(doc.Mappings))
+	}
+	modbus, err := MapSourceValue(*modbusProfile, "1230")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -93,7 +104,7 @@ func TestShippedSourceMappingExample(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	sunspec, err := MapSourceValue(doc.Mappings[1], sunspecEngineeringValue)
+	sunspec, err := MapSourceValue(*sunspecProfile, sunspecEngineeringValue)
 	if err != nil {
 		t.Fatal(err)
 	}
