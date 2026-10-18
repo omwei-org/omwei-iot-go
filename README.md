@@ -112,6 +112,20 @@ The example profile identifies the model point and scale-factor dependency, but
 the caller remains responsible for reading a coherent pair and validating the
 model/point layout against the applicable SunSpec model specification.
 
+## Transport-neutral adapter contract
+
+Protocol adapters should normalize protocol-specific payloads into a
+`SourceSample` containing the exact configured `SourceIdentity`, a plain
+decimal `Value`, and the `Unit` of that value. Resolve protocol-specific
+scale factors (such as SunSpec `W_SF`) before creating the sample. Then call
+`MapSourceSample(mapping, sample)`; it rejects source-identity and observed-unit
+mismatches before mapping and constructing the canonical atom.
+
+This boundary intentionally does not perform network I/O, discover points,
+authenticate devices, establish data freshness, or infer unit conversions.
+Those responsibilities remain with the adapter/integration layer and must be
+covered by protocol-specific conformance tests.
+
 ## Scope
 
 Ported: descriptors, atoms, 6-byte and 16-byte encodings, decimal conversion,
