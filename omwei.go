@@ -44,6 +44,8 @@ var (
 	ErrAmbiguousExternalMapping = errors.New("ambiguous external mapping")
 	ErrInvalidSourceMapping     = errors.New("invalid source mapping")
 	ErrSourceUnitMismatch       = errors.New("source transform target unit does not match descriptor unit")
+	ErrSourceIdentityMismatch   = errors.New("source sample identity does not match mapping")
+	ErrObservedSourceUnitMismatch = errors.New("source sample unit does not match mapping source unit")
 	ErrOutOfRange               = errors.New("value outside descriptor constraints")
 	ErrInvalidAtomLength        = errors.New("invalid OMWEI atom length")
 	ErrInvalidDecimal           = errors.New("invalid decimal")
