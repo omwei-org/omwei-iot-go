@@ -133,3 +133,39 @@ func TestTwoIndependentSourcesMapToSameCanonicalDescriptor(t *testing.T) {
 		t.Fatalf("same canonical atom must have identical wire bytes: Modbus=%x SunSpec=%x", modbusWire, sunspecWire)
 	}
 }
+
+
+func TestMapSourceSampleChecksIdentityAndObservedUnit(t *testing.T) {
+	m := temperatureSourceMapping()
+	sample := SourceSample{
+		Source: m.Source,
+		Value: "225",
+		Unit: m.SourceUnit,
+	}
+	result, err := MapSourceSample(m, sample)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Atom != (Atom{DescriptorID: AmbientTemperatureID, CanonicalValue: 22500}) {
+		t.Fatalf("unexpected mapped atom: %+v", result.Atom)
+	}
+
+	sample.Source.Point = "holding:40002"
+	if _, err := MapSourceSample(m, sample); !errors.Is(err, ErrSourceIdentityMismatch) {
+		t.Fatalf("want source identity mismatch, got %v", err)
+	}
+
+	sample.Source = m.Source
+	sample.Unit = "degree_Fahrenheit"
+	if _, err := MapSourceSample(m, sample); !errors.Is(err, ErrObservedSourceUnitMismatch) {
+		t.Fatalf("want observed source unit mismatch, got %v", err)
+	}
+}
+
+func TestMapSourceSampleRejectsBlankValue(t *testing.T) {
+	m := temperatureSourceMapping()
+	_, err := MapSourceSample(m, SourceSample{Source: m.Source, Value: " ", Unit: m.SourceUnit})
+	if !errors.Is(err, ErrInvalidDecimal) {
+		t.Fatalf("want invalid decimal, got %v", err)
+	}
+}
