@@ -53,3 +53,39 @@ func TestRunnerFailsOnUnknownExpectedError(t *testing.T) {
 		t.Fatal("runner must reject unknown expected error names")
 	}
 }
+
+func TestRunnerRejectsAmbiguousVectorOutcome(t *testing.T) {
+	root := filepath.Join("..", "..")
+	profiles := filepath.Join(root, "examples", "source-mappings-v1.json")
+	raw, err := os.ReadFile(filepath.Join(root, "testdata", "source-mapping-interop-v1.json"))
+	if err != nil { t.Fatal(err) }
+	var doc map[string]any
+	if err := json.Unmarshal(raw, &doc); err != nil { t.Fatal(err) }
+	cases := doc["cases"].([]any)
+	first := cases[0].(map[string]any)
+	first["expected_error"] = "out_of_range"
+	broken, err := json.Marshal(doc)
+	if err != nil { t.Fatal(err) }
+	vectors := filepath.Join(t.TempDir(), "ambiguous-vectors.json")
+	if err := os.WriteFile(vectors, broken, 0600); err != nil { t.Fatal(err) }
+	if err := run(profiles, vectors); err == nil {
+		t.Fatal("runner must reject a vector declaring both success and error outcomes")
+	}
+}
+
+func TestRunnerRejectsUnknownVectorFields(t *testing.T) {
+	root := filepath.Join("..", "..")
+	profiles := filepath.Join(root, "examples", "source-mappings-v1.json")
+	raw, err := os.ReadFile(filepath.Join(root, "testdata", "source-mapping-interop-v1.json"))
+	if err != nil { t.Fatal(err) }
+	var doc map[string]any
+	if err := json.Unmarshal(raw, &doc); err != nil { t.Fatal(err) }
+	doc["surprise"] = true
+	broken, err := json.Marshal(doc)
+	if err != nil { t.Fatal(err) }
+	vectors := filepath.Join(t.TempDir(), "unknown-field-vectors.json")
+	if err := os.WriteFile(vectors, broken, 0600); err != nil { t.Fatal(err) }
+	if err := run(profiles, vectors); err == nil {
+		t.Fatal("runner must reject unknown vector document fields")
+	}
+}
