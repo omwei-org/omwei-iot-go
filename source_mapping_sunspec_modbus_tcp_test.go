@@ -149,7 +149,6 @@ func (s *localModbusTCPServer) serveOne(conn net.Conn) error {
 	lengthField := uint16(3 + quantity*2)
 	if mode == "invalid_mbap_length" {
 		lengthField = 2
-		response = response[:8]
 	}
 	binary.BigEndian.PutUint16(response[0:2], responseTransactionID)
 	binary.BigEndian.PutUint16(response[2:4], 0)
@@ -157,6 +156,9 @@ func (s *localModbusTCPServer) serveOne(conn net.Conn) error {
 	response[6] = responseUnitID
 	response[7] = responseFunction
 	response[8] = byteCount
+	if mode == "invalid_mbap_length" {
+		response = response[:8]
+	}
 	for i, value := range values {
 		if 9+i*2+2 <= len(response) {
 			binary.BigEndian.PutUint16(response[9+i*2:11+i*2], value)
