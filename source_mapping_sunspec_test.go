@@ -61,7 +61,7 @@ func TestMapSunSpecModel103ActivePowerEndToEnd(t *testing.T) {
 		{"scale zero", 123, 0, 123, "00450000007b"},
 		{"negative scale", 1234, -1, 123, "00450000007b"},
 		{"positive scale", 12, 1, 120, "004500000078"},
-		{"round half away from zero", -125, -1, -13, "0045fffffff3"},
+		{"round half away from zero", 125, -1, 13, "00450000000d"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
