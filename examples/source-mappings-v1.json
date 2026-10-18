@@ -4,12 +4,12 @@
     {
       "source": {
         "protocol": "modbus",
-        "device": "inverter-1",
+        "device": "meter-1",
         "point": "holding:40001"
       },
-      "descriptor_id": 66,
-      "source_unit": "register-tenths-of-degree-C",
-      "canonical_unit": "degree_Celsius",
+      "descriptor_id": 69,
+      "source_unit": "register-tenths-of-watt",
+      "canonical_unit": "watt",
       "scale_numerator": 1,
       "scale_denominator": 10,
       "offset_numerator": 0,
@@ -17,13 +17,13 @@
     },
     {
       "source": {
-        "protocol": "sunspec",
+        "protocol": "sunspec-modbus",
         "device": "inverter-2",
-        "point": "model:103:TmpAmb"
+        "point": "model:103:W;scale-factor:W_SF"
       },
-      "descriptor_id": 66,
-      "source_unit": "degree_Celsius",
-      "canonical_unit": "degree_Celsius",
+      "descriptor_id": 69,
+      "source_unit": "watt (W_SF resolved before mapping)",
+      "canonical_unit": "watt",
       "scale_numerator": 1,
       "scale_denominator": 1,
       "offset_numerator": 0,
