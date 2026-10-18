@@ -148,6 +148,18 @@ atom := result.Atom
 _ = atom
 ```
 
+A localhost Modbus TCP simulator test exercises the MBAP frame, function
+code 4/3 register reads, transaction ID, unit ID, model discovery, and final
+mapping without hardware. Run it with:
+
+```sh
+go test ./... -run 'TestSunSpecModel103OverLocalModbusTCPToEABCAtom|TestDiscoverSunSpecModel103|TestSunSpecModel103ModbusAdapter'
+```
+
+The simulator uses synthetic registers and is deliberately test-only; it is
+not a production Modbus server and does not replace testing against a vendor
+device or a standards-validated simulator.
+
 Choose `SunSpecInputRegister` or `SunSpecHoldingRegister` according to the
 device's documented register table. Discovery validates the model chain's
 bounds and Model 103's minimum point length; it does not prove the device's
