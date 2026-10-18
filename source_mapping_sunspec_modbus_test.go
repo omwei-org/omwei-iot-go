@@ -49,7 +49,7 @@ func TestSunSpecModel103ModbusAdapterReadsWAndScaleFactorTogether(t *testing.T) 
 		t.Fatalf("unexpected snapshot: source=%+v model=%d W=%d SF=%d id=%q", source, modelID, w, sf, snapshot)
 	}
 	if client.gotCtx != ctx || client.gotUnit != 7 || client.gotAddr != 40022 || client.gotQuantity != 2 || !client.gotInput {
-		t.Fatalf("wrong Modbus request: ctx=%v unit=%d addr=%d quantity=%d type=%v", client.gotCtx, client.gotUnit, client.gotAddr, client.gotQuantity, client.gotType)
+		t.Fatalf("wrong Modbus request: ctx=%v unit=%d addr=%d quantity=%d input-registers=%v", client.gotCtx, client.gotUnit, client.gotAddr, client.gotQuantity, client.gotInput)
 	}
 }
 
