@@ -112,7 +112,7 @@ func MapSunSpecModel103Snapshot(mapping SourceMapping, sample SunSpecModel103Act
 // succeeds. The interface contract is not itself proof of a transport's
 // implementation; concrete adapters must test that guarantee at their layer.
 type SunSpecModel103ActivePowerReader interface {
-	ReadModel103ActivePower() (source SourceIdentity, modelID uint16, rawW int16, wSF int16, snapshotID string, err error)
+	ReadModel103ActivePowerRegisters() (source SourceIdentity, modelID uint16, wRegister uint16, wSFRegister uint16, snapshotID string, err error)
 }
 
 // ReadAndMapSunSpecModel103ActivePower keeps acquisition and mapping in one
@@ -122,7 +122,11 @@ func ReadAndMapSunSpecModel103ActivePower(reader SunSpecModel103ActivePowerReade
 	if reader == nil {
 		return ConversionResult{}, ErrSourceIdentityMismatch
 	}
-	source, modelID, rawW, wSF, snapshotID, err := reader.ReadModel103ActivePower()
+	source, modelID, wRegister, wSFRegister, snapshotID, err := reader.ReadModel103ActivePowerRegisters()
+	if err != nil {
+		return ConversionResult{}, err
+	}
+	rawW, wSF, err := DecodeSunSpecModel103Registers(wRegister, wSFRegister)
 	if err != nil {
 		return ConversionResult{}, err
 	}
