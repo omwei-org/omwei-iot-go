@@ -95,6 +95,17 @@ source identities, and canonical-unit mismatches. It does not infer unit
 conversions from unit labels, verify vendor-specific point semantics, or replace
 device documentation. Treat profiles as configuration that requires review.
 
+## SunSpec scale factors
+
+SunSpec integer points can use a separate scale-factor point (for example,
+`W` together with `W_SF`). Resolve the scale factor from the same model/device
+snapshot and apply `engineering value = raw × 10^scale factor` before passing
+the decimal string to `MapSourceValue`. The helper
+`DecodeSunSpecScaledInteger` performs this step without binary floating point.
+The example profile identifies the model point and scale-factor dependency, but
+the caller remains responsible for reading a coherent pair and validating the
+model/point layout against the applicable SunSpec model specification.
+
 ## Scope
 
 Ported: descriptors, atoms, 6-byte and 16-byte encodings, decimal conversion,
