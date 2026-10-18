@@ -121,7 +121,7 @@ func TestMapSunSpecModel103SnapshotRequiresCoherentIdentity(t *testing.T) {
 		{"missing snapshot id", func(s *SunSpecModel103ActivePowerSnapshot) { s.SnapshotID = "" }, ErrSourceIdentityMismatch},
 		{"wrong model", func(s *SunSpecModel103ActivePowerSnapshot) { s.ModelID = 101 }, ErrSourceIdentityMismatch},
 		{"wrong device", func(s *SunSpecModel103ActivePowerSnapshot) { s.Source.Device = "inverter-3" }, ErrSourceIdentityMismatch},
-		{"wrong point", func(s *SunSpecModel103ActivePowerSnapshot) { s.Source.Point = "model:103:V;scale-factor:V_SF" }, ErrInvalidSourceMapping},
+		{"wrong point", func(s *SunSpecModel103ActivePowerSnapshot) { s.Source.Point = "model:103:V;scale-factor:V_SF" }, ErrSourceIdentityMismatch},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
