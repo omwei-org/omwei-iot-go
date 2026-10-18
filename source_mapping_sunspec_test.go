@@ -137,13 +137,13 @@ func TestMapSunSpecModel103SnapshotRequiresCoherentIdentity(t *testing.T) {
 type fakeSunSpec103Reader struct {
 	source SourceIdentity
 	model uint16
-	raw int16
-	sf int16
+	raw uint16
+	sf uint16
 	snapshot string
 	err error
 }
 
-func (f fakeSunSpec103Reader) ReadModel103ActivePower() (SourceIdentity, uint16, int16, int16, string, error) {
+func (f fakeSunSpec103Reader) ReadModel103ActivePowerRegisters() (SourceIdentity, uint16, uint16, uint16, string, error) {
 	return f.source, f.model, f.raw, f.sf, f.snapshot, f.err
 }
 
@@ -153,7 +153,7 @@ func TestReadAndMapSunSpecModel103ActivePower(t *testing.T) {
 		DescriptorID: 69, SourceUnit: "watt (after W_SF application)", CanonicalUnit: "watt",
 		ScaleNumerator: 1, ScaleDenominator: 1, OffsetNumerator: 0, OffsetDenominator: 1,
 	}
-	reader := fakeSunSpec103Reader{source: mapping.Source, model: 103, raw: 1234, sf: -1, snapshot: "poll-19"}
+	reader := fakeSunSpec103Reader{source: mapping.Source, model: 103, raw: 1234, sf: 0xffff, snapshot: "poll-19"}
 	got, err := ReadAndMapSunSpecModel103ActivePower(reader, mapping)
 	if err != nil || got.Atom.CanonicalValue != 123 {
 		t.Fatalf("want 123 W, got %+v err=%v", got, err)
