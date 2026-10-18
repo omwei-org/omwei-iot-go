@@ -25,7 +25,7 @@ jobs:
       - run: go test ./... -count=1
       - name: Validate source mapping JSON Schemas and examples
         run: |
-          python -m pip install --disable-pip-version-check jsonschema
+          python -m pip install --disable-pip-version-check -r requirements-schema-validation.txt
           python scripts/validate_source_mapping_schemas.py
       - name: Build without cgo
         run: CGO_ENABLED=0 go build ./...
