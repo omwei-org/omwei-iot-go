@@ -91,3 +91,45 @@ func TestMapSourceValueRoundingReport(t *testing.T) {
 		t.Fatalf("expected rounded encoded value 333, got %+v", result)
 	}
 }
+
+
+// TestTwoIndependentSourcesMapToSameCanonicalDescriptor is an illustrative
+// Modbus/SunSpec-style PoC. These profiles demonstrate the mapping contract;
+// they are not asserted to match a specific vendor device's register map.
+func TestTwoIndependentSourcesMapToSameCanonicalDescriptor(t *testing.T) {
+	modbus := temperatureSourceMapping()
+	sunspec := SourceMapping{
+		Source: SourceIdentity{
+			Protocol: "sunspec",
+			Device:   "inverter-2",
+			Point:    "model:103:TmpAmb",
+		},
+		DescriptorID:      AmbientTemperatureID,
+		SourceUnit:        "degree_Celsius",
+		CanonicalUnit:     "degree_Celsius",
+		ScaleNumerator:    1,
+		ScaleDenominator:  1,
+		OffsetNumerator:   0,
+		OffsetDenominator: 1,
+	}
+
+	modbusResult, err := MapSourceValue(modbus, "225") // register value in tenths of °C
+	if err != nil {
+		t.Fatal(err)
+	}
+	sunspecResult, err := MapSourceValue(sunspec, "22.5") // already expressed in °C
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if modbus.Source == sunspec.Source {
+		t.Fatal("the source identities must remain distinct")
+	}
+	if modbusResult.Atom != sunspecResult.Atom {
+		t.Fatalf("same physical value must produce same canonical atom: Modbus=%+v SunSpec=%+v", modbusResult.Atom, sunspecResult.Atom)
+	}
+	modbusWire, sunspecWire := Encode(modbusResult.Atom), Encode(sunspecResult.Atom)
+	if modbusWire != sunspecWire {
+		t.Fatalf("same canonical atom must have identical wire bytes: Modbus=%x SunSpec=%x", modbusWire, sunspecWire)
+	}
+}
