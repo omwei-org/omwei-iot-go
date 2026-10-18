@@ -56,7 +56,7 @@ Keep in sync with the Rust crate: `scripts/sync-from-rust.sh <path-to-omwei_iot>
 The source-mapping API separates upstream point identity and raw-value transforms
 from the canonical OMWEI descriptor. An illustrative, versioned JSON profile is
 available at `examples/source-mappings-v1.json`. It demonstrates two distinct
-source points mapping to descriptor `0x0042`; it is not a verified vendor
+source points mapping to descriptor `0x0045` (`active_power`); it is not a verified vendor
 register map.
 
 Load and validate a profile with:
@@ -77,7 +77,7 @@ func mapExample() error {
     if err != nil {
         return err
     }
-    result, err := omwei.MapSourceValue(doc.Mappings[0], "225")
+    result, err := omwei.MapSourceValue(doc.Mappings[0], "1230")
     if err != nil {
         return err
     }
@@ -125,6 +125,21 @@ This boundary intentionally does not perform network I/O, discover points,
 authenticate devices, establish data freshness, or infer unit conversions.
 Those responsibilities remain with the adapter/integration layer and must be
 covered by protocol-specific conformance tests.
+
+## Transport-neutral interop contract
+
+`SourceSample` is the adapter boundary: it carries the configured source
+identity, a decimal-string value, and the unit of that value. The adapter must
+resolve protocol-specific encodings (including SunSpec `W_SF`) before
+constructing the sample. `MapSourceSample` rejects identity and observed-unit
+mismatches before applying the configured rational transform.
+
+The shared test vectors in `testdata/source-mapping-interop-v1.json` cover
+successful Modbus-style and SunSpec-style samples that converge on the same
+six-byte atom, as well as negative identity and unit checks. Run them with
+`go test ./... -count=1`. These are synthetic contract vectors, not a captured
+device session or proof of vendor register addressing. A future OT Fabric
+adapter should run the same vectors at its integration boundary.
 
 ## Scope
 
