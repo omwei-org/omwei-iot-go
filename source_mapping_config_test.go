@@ -3,6 +3,7 @@ package omwei
 import (
 	"encoding/json"
 	"errors"
+	"os"
 	"strings"
 	"testing"
 )
@@ -68,5 +69,31 @@ func TestParseSourceMappingDocumentRejectsDuplicateSourceIdentity(t *testing.T) 
 	_, err = ParseSourceMappingDocument(duplicated)
 	if !errors.Is(err, ErrDuplicateSourceIdentity) {
 		t.Fatalf("want duplicate source identity, got %v", err)
+	}
+}
+
+
+func TestShippedSourceMappingExample(t *testing.T) {
+	data, err := os.ReadFile("examples/source-mappings-v1.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	doc, err := ParseSourceMappingDocument(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(doc.Mappings) != 2 {
+		t.Fatalf("want two independent example profiles, got %d", len(doc.Mappings))
+	}
+	modbus, err := MapSourceValue(doc.Mappings[0], "225")
+	if err != nil {
+		t.Fatal(err)
+	}
+	sunspec, err := MapSourceValue(doc.Mappings[1], "22.5")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if modbus.Atom != sunspec.Atom {
+		t.Fatalf("example profiles should converge to one atom: %v != %v", modbus.Atom, sunspec.Atom)
 	}
 }
