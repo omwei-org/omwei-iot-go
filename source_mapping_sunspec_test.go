@@ -173,3 +173,30 @@ func TestReadAndMapSunSpecModel103ActivePower(t *testing.T) {
 	}
 }
 
+func TestDecodeSunSpecModel103Registers(t *testing.T) {
+	tests := []struct {
+		name string
+		w uint16
+		sf uint16
+		wantW int16
+		wantSF int16
+		wantErr error
+	}{
+		{"positive values", 1234, 0xffff, 1234, -1, nil},
+		{"negative signed power", 0xff85, 0, -123, 0, nil},
+		{"W not implemented", 0x8000, 0, 0, 0, ErrInvalidSunSpecValue},
+		{"W_SF not implemented", 123, 0x8000, 0, 0, ErrInvalidSunSpecValue},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			w, sf, err := DecodeSunSpecModel103Registers(tt.w, tt.sf)
+			if !errors.Is(err, tt.wantErr) {
+				t.Fatalf("want err %v, got %v", tt.wantErr, err)
+			}
+			if err == nil && (w != tt.wantW || sf != tt.wantSF) {
+				t.Fatalf("want W=%d W_SF=%d, got W=%d W_SF=%d", tt.wantW, tt.wantSF, w, sf)
+			}
+		})
+	}
+}
+
