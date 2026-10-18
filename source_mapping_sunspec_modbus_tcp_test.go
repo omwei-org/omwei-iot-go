@@ -76,6 +76,12 @@ func startLocalModbusTCPServer(t *testing.T) *localModbusTCPServer {
 
 func (s *localModbusTCPServer) address() string { return s.listener.Addr().String() }
 
+func (s *localModbusTCPServer) setResponseMode(mode string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.responseMode = mode
+}
+
 func (s *localModbusTCPServer) serveOne(conn net.Conn) error {
 	_ = conn.SetDeadline(time.Now().Add(3 * time.Second))
 	header := make([]byte, 7)
@@ -241,7 +247,7 @@ func (c *localModbusTCPClient) read(ctx context.Context, unitID uint8, address u
 	return values, nil
 }
 
-func TestSunSpecModel103OverLocalModbusTCPToEABCAtom(t *testing.T) {
+func TestSunSpecModel103OverLocalModbusTCPToCanonicalWattValue(t *testing.T) {
 	server := startLocalModbusTCPServer(t)
 	client := &localModbusTCPClient{address: server.address()}
 	source := SourceIdentity{Protocol: "sunspec-modbus", Device: "simulated-inverter-7", Point: "model:103:W;scale-factor:W_SF"}
@@ -281,7 +287,7 @@ func TestLocalModbusTCPClientRejectsMalformedResponses(t *testing.T) {
 	for _, mode := range modes {
 		t.Run(mode, func(t *testing.T) {
 			server := startLocalModbusTCPServer(t)
-			server.responseMode = mode
+			server.setResponseMode(mode)
 			client := &localModbusTCPClient{address: server.address()}
 			_, err := client.ReadInputRegisters(context.Background(), 7, 114, 2)
 			if err == nil {
