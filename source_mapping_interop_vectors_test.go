@@ -64,6 +64,10 @@ func TestSourceMappingInteropVectors(t *testing.T) {
 					if !errors.Is(err, ErrSourceIdentityMismatch) { t.Fatalf("want identity mismatch, got %v", err) }
 				case "observed_source_unit_mismatch":
 					if !errors.Is(err, ErrObservedSourceUnitMismatch) { t.Fatalf("want unit mismatch, got %v", err) }
+				case "invalid_decimal":
+					if !errors.Is(err, ErrInvalidDecimal) { t.Fatalf("want invalid decimal, got %v", err) }
+				case "out_of_range":
+					if !errors.Is(err, ErrOutOfRange) { t.Fatalf("want out-of-range, got %v", err) }
 				default:
 					t.Fatalf("unknown expected_error %q", tc.ExpectedError)
 				}
