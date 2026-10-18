@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"math/big"
+	"strings"
 )
 
 // SourceIdentity identifies one concrete point in an upstream system.
@@ -69,6 +70,32 @@ func MapSourceValue(mapping SourceMapping, rawValue string) (ConversionResult, e
 		return ConversionResult{}, err
 	}
 	return ConversionResult{Atom: atom, Rounded: rounded}, nil
+}
+
+
+// SourceSample is the transport-neutral boundary between a protocol adapter and
+// the semantic mapper. Value must be a plain decimal string. Protocol adapters
+// must resolve protocol-specific scale factors before constructing the sample;
+// Unit describes that resulting value and must match the configured mapping.
+type SourceSample struct {
+	Source SourceIdentity `json:"source"`
+	Value  string         `json:"value"`
+	Unit   string         `json:"unit"`
+}
+
+// MapSourceSample verifies that a sample belongs to the configured source and
+// declares the expected source unit before applying its configured transform.
+func MapSourceSample(mapping SourceMapping, sample SourceSample) (ConversionResult, error) {
+	if sample.Source != mapping.Source {
+		return ConversionResult{}, ErrSourceIdentityMismatch
+	}
+	if sample.Unit != mapping.SourceUnit {
+		return ConversionResult{}, ErrObservedSourceUnitMismatch
+	}
+	if strings.TrimSpace(sample.Value) == "" {
+		return ConversionResult{}, ErrInvalidDecimal
+	}
+	return MapSourceValue(mapping, sample.Value)
 }
 
 // roundRationalAwayFromZero rounds to the nearest integer; halfway cases are
