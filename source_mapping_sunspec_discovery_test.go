@@ -84,3 +84,30 @@ func TestDiscoverSunSpecModel103PropagatesTransportError(t *testing.T) {
 		t.Fatalf("got %v, want transport error", err)
 	}
 }
+
+func TestDiscoverSunSpecModel103AdapterUsesDiscoveredAddress(t *testing.T) {
+	client := &fakeSunSpecDiscoveryClient{responses: [][]uint16{
+		{103, 14},
+		{1234, 0xffff},
+	}}
+	source := SourceIdentity{Protocol: "sunspec-modbus", Device: "inverter-7", Point: "model:103:W;scale-factor:W_SF"}
+	adapter, err := DiscoverSunSpecModel103Adapter(context.Background(), client, source, 7, SunSpecInputRegister,
+		SunSpecModelDiscoveryConfig{FirstHeaderAddress: 200, MaxModels: 8})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if adapter.ModelID != 103 || adapter.ModelLength != 14 || adapter.ModelStartAddress != 202 {
+		t.Fatalf("adapter did not use discovered header: %+v", adapter)
+	}
+	gotSource, modelID, w, sf, snapshot, err := adapter.ReadModel103ActivePowerRegisters()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if gotSource != source || modelID != 103 || w != 1234 || sf != 0xffff || snapshot == "" {
+		t.Fatalf("unexpected sample: source=%+v model=%d W=%d SF=%d snapshot=%q", gotSource, modelID, w, sf, snapshot)
+	}
+	if len(client.addrs) != 2 || client.addrs[0] != 200 || client.addrs[1] != 214 ||
+		client.quantities[0] != 2 || client.quantities[1] != 2 {
+		t.Fatalf("unexpected discovery/read requests: addresses=%v quantities=%v", client.addrs, client.quantities)
+	}
+}
