@@ -136,7 +136,9 @@ mismatches before applying the configured rational transform.
 
 The shared test vectors in `testdata/source-mapping-interop-v1.json` cover
 successful Modbus-style and SunSpec-style samples that converge on the same
-six-byte atom, as well as negative identity and unit checks. Run them with
+six-byte atom, as well as negative identity and unit checks. JSON Schemas for
+profiles and vectors live under `schemas/` so non-Go implementations can validate
+the same documents. Run them with
 `go test ./... -count=1`. These are synthetic contract vectors, not a captured
 device session or proof of vendor register addressing. A future OT Fabric
 adapter should run the same vectors at its integration boundary.
