@@ -3,6 +3,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -48,13 +49,33 @@ func run(profilePath, vectorsPath string) error {
 
 	vectorBytes, err := os.ReadFile(vectorsPath)
 	if err != nil { return fmt.Errorf("read vectors: %w", err) }
+	decoder := json.NewDecoder(bytes.NewReader(vectorBytes))
+	decoder.DisallowUnknownFields()
 	var doc vectorDocument
-	if err := json.Unmarshal(vectorBytes, &doc); err != nil { return fmt.Errorf("parse vectors: %w", err) }
+	if err := decoder.Decode(&doc); err != nil { return fmt.Errorf("parse vectors: %w", err) }
+	var trailing any
+	if err := decoder.Decode(&trailing); err != nil && err.Error() != "EOF" {
+		return fmt.Errorf("parse vectors trailing data: %w", err)
+	} else if err == nil {
+		return fmt.Errorf("parse vectors: multiple JSON values")
+	}
 	if doc.SchemaVersion != "1" || len(doc.Cases) == 0 {
 		return fmt.Errorf("invalid vector document: schema_version must be 1 and cases must not be empty")
 	}
-
+	seenNames := make(map[string]struct{}, len(doc.Cases))
 	for _, tc := range doc.Cases {
+		if tc.Name == "" { return fmt.Errorf("vector case name must not be empty") }
+		if _, exists := seenNames[tc.Name]; exists { return fmt.Errorf("duplicate vector case name %q", tc.Name) }
+		seenNames[tc.Name] = struct{}{}
+		if (tc.ExpectedWireHex == "") == (tc.ExpectedError == "") {
+			return fmt.Errorf("%s: exactly one of expected_wire_hex or expected_error is required", tc.Name)
+		}
+		if tc.ExpectedError != "" {
+			switch tc.ExpectedError {
+			case "source_identity_mismatch", "observed_source_unit_mismatch", "invalid_decimal", "out_of_range":
+			default: return fmt.Errorf("%s: unsupported expected error %q", tc.Name, tc.ExpectedError)
+			}
+		}
 		var mapping *omwei.SourceMapping
 		for i := range profiles.Mappings {
 			if profiles.Mappings[i].Source == tc.Sample.Source {
