@@ -156,6 +156,11 @@ mapping without hardware. Run it with:
 go test ./... -run 'TestSunSpecModel103OverLocalModbusTCPToEABCAtom|TestDiscoverSunSpecModel103|TestSunSpecModel103ModbusAdapter'
 ```
 
+The TCP test suite also injects malformed responses: Modbus exception
+frames, truncated exception frames, mismatched transaction IDs and Unit IDs,
+unexpected function codes, incorrect byte counts, and invalid MBAP lengths.
+The client must fail closed for every injected fault.
+
 The simulator uses synthetic registers and is deliberately test-only; it is
 not a production Modbus server and does not replace testing against a vendor
 device or a standards-validated simulator.
