@@ -22,7 +22,7 @@
         "point": "model:103:W;scale-factor:W_SF"
       },
       "descriptor_id": 69,
-      "source_unit": "watt (W_SF resolved before mapping)",
+      "source_unit": "watt (after W_SF application)",
       "canonical_unit": "watt",
       "scale_numerator": 1,
       "scale_denominator": 1,
