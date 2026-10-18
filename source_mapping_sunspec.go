@@ -64,4 +64,31 @@ func MapSunSpecModel103ActivePower(mapping SourceMapping, source SourceIdentity,
 	}
 	return MapSourceSample(mapping, SourceSample{Source: source, Value: value, Unit: mapping.SourceUnit})
 }
+ 
+// SunSpecModel103ActivePowerSnapshot is one coherent adapter read. The adapter
+// must populate W and W_SF from the same model instance/read transaction and
+// use SnapshotID to identify that acquisition. This package cannot verify the
+// transport's claim; it makes the claim explicit at the mapper boundary.
+type SunSpecModel103ActivePowerSnapshot struct {
+	Source     SourceIdentity
+	SnapshotID string
+	ModelID    uint16
+	RawW       int16
+	WSF        int16
+}
+
+// MapSunSpecModel103Snapshot maps an explicitly coherent Model 103 sample.
+// It rejects absent snapshot identity, wrong model/point identity, and a
+// source-device mismatch before producing an atom.
+func MapSunSpecModel103Snapshot(mapping SourceMapping, sample SunSpecModel103ActivePowerSnapshot) (ConversionResult, error) {
+	if strings.TrimSpace(sample.SnapshotID) == "" || sample.ModelID != 103 ||
+		sample.Source.Device == "" || sample.Source != mapping.Source {
+		return ConversionResult{}, ErrSourceIdentityMismatch
+	}
+	if sample.Source.Protocol != "sunspec-modbus" ||
+		sample.Source.Point != "model:103:W;scale-factor:W_SF" {
+		return ConversionResult{}, ErrInvalidSourceMapping
+	}
+	return MapSunSpecModel103ActivePower(mapping, sample.Source, int64(sample.RawW), sample.WSF)
+}
 
