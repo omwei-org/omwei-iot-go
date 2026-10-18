@@ -148,6 +148,23 @@ atom := result.Atom
 _ = atom
 ```
 
+The optional production-client contract check lives in a nested module
+so the core library remains dependency-free. It pins
+`github.com/otfabric/modbus v1.0.0` (Go 1.21-compatible) and verifies at
+compile/test time that its public `*modbus.Client` implements
+`SunSpecModel103RegisterClient`:
+
+```sh
+cd integration/otfabric-modbus
+go mod tidy
+go test ./... -count=1
+```
+
+The CI workflow runs this check independently of the root module. This is an
+API compatibility check, not a live transport test against the upstream
+client; the root module's localhost simulator currently tests our own
+minimal test client.
+
 A localhost Modbus TCP simulator test exercises the MBAP frame, function
 code 4/3 register reads, transaction ID, unit ID, model discovery, and final
 mapping without hardware. Run it with:
