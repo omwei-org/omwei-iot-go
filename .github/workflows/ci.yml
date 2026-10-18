@@ -23,6 +23,8 @@ jobs:
           go-version-file: go.mod
       - run: go vet ./...
       - run: go test ./... -count=1
+      - name: Run source mapping interoperability vectors
+        run: go run ./cmd/source-mapping-vectors
       - name: Validate source mapping JSON Schemas and examples
         run: |
           python -m pip install --disable-pip-version-check -r requirements-schema-validation.txt
