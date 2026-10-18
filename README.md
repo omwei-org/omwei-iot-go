@@ -43,6 +43,12 @@ values, ties, 40+ digit inputs, atom construction, atom decoding) give
 byte-identical results in Rust and Go. Reproduce with `scripts/difftest.sh <rust-ref-binary>`;
 `scripts/gen_cases.py` generates the cases deterministically (fixed seed).
 
+CI (`.github/workflows/ci.yml`) builds the real Rust crate at a pinned commit
+(tag `v0.1.2`) and runs the same differential test on every push. To run it
+locally: `git clone https://github.com/Equinibrium/omwei_iot rust-src && git -C rust-src checkout 446ebe4`,
+then `cargo build --release --manifest-path rustref/Cargo.toml` and
+`scripts/difftest.sh rustref/target/release/omwei-rustref`.
+
 Keep in sync with the Rust crate: `scripts/sync-from-rust.sh <path-to-omwei_iot>`.
 
 ## Scope

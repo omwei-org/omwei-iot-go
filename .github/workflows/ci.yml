@@ -1,0 +1,54 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  # Rust reference pinned to a commit, never to a branch. This is the commit
+  # of tag v0.1.2 of Equinibrium/omwei_iot.
+  RUST_REF_REPO: Equinibrium/omwei_iot
+  RUST_REF_REV: 446ebe4d7164ef10cfa63eb72b798fe633f83f4a
+
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go vet ./...
+      - run: go test ./... -count=1
+      - name: Build without cgo
+        run: CGO_ENABLED=0 go build ./...
+      - name: Generated registry is up to date
+        run: |
+          go generate ./...
+          git diff --exit-code -- registry_generated.go
+
+  differential:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Check out pinned Rust reference
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.RUST_REF_REPO }}
+          ref: ${{ env.RUST_REF_REV }}
+          path: rust-src
+      - name: Shared corpus and vectors match the Rust reference
+        run: |
+          cmp registry/corpus-v0.1.yaml rust-src/registry/corpus-v0.1.yaml
+          cmp testdata/atom-v1.json rust-src/tests/vectors/atom-v1.json
+          cmp testdata/decimal-conversion-v1.json rust-src/tests/vectors/decimal-conversion-v1.json
+      - name: Build Rust reference (real crate, full dependencies)
+        run: cargo build --release --manifest-path rustref/Cargo.toml
+      - name: Differential test (200,000 cases)
+        run: bash scripts/difftest.sh rustref/target/release/omwei-rustref

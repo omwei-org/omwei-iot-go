@@ -1,0 +1,13 @@
+# Rust reference harness for the differential test (see ../scripts/difftest.sh).
+# It builds the REAL omwei-iot crate, checked out at a pinned commit into
+# ../rust-src by CI (or by hand, see README). Not part of the Go module.
+[package]
+name = "omwei-rustref"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+omwei-iot = { path = "../rust-src" }
+
+[workspace]
