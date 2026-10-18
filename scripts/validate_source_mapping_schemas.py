@@ -28,9 +28,10 @@ def main() -> None:
         schema = load_json(schema_path)
         Draft202012Validator.check_schema(schema)
         document = load_json(document_path)
+        validator = Draft202012Validator(schema)
         errors = sorted(
-            Draft202012Validator(schema).iter_errors(document),
-            key=lambda error: list(error.absolute_path),
+            validator.iter_errors(document),
+            key=lambda error: str(list(error.absolute_path)),
         )
         if errors:
             details = "\n".join(
@@ -39,6 +40,17 @@ def main() -> None:
             )
             raise SystemExit(f"Schema validation failed:\n{details}")
         print(f"OK: {document_path} conforms to {schema_path}")
+
+        # Prove the schema rejects a malformed derivative, not just that the
+        # canonical checked-in example happens to parse.
+        malformed = json.loads(json.dumps(document))
+        if document_path.endswith("source-mappings-v1.json"):
+            malformed["mappings"][0]["scale_denominator"] = 0
+        else:
+            malformed["cases"][0]["expected_wire_hex"] = "not-a-wire-value"
+        if not list(validator.iter_errors(malformed)):
+            raise SystemExit(f"Schema unexpectedly accepted malformed {document_path}")
+        print(f"OK: schema rejects malformed derivative of {document_path}")
 
 
 if __name__ == "__main__":
