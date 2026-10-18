@@ -187,3 +187,38 @@ func TestMapSourceValueAllowsNegativeScaleAndRejectsZeroScale(t *testing.T) {
 		t.Fatalf("zero scale must be rejected, got %v", err)
 	}
 }
+
+
+func TestMapSourceSampleRejectsEveryIdentityComponentMismatch(t *testing.T) {
+	m := temperatureSourceMapping()
+	base := SourceSample{Source: m.Source, Value: "225", Unit: m.SourceUnit}
+	tests := []struct {
+		name string
+		edit func(*SourceSample)
+	}{
+		{"protocol", func(s *SourceSample) { s.Source.Protocol = "sunspec" }},
+		{"device", func(s *SourceSample) { s.Source.Device = "inverter-2" }},
+		{"point", func(s *SourceSample) { s.Source.Point = "holding:40002" }},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			sample := base
+			tt.edit(&sample)
+			if _, err := MapSourceSample(m, sample); !errors.Is(err, ErrSourceIdentityMismatch) {
+				t.Fatalf("want source identity mismatch, got %v", err)
+			}
+		})
+	}
+}
+
+func TestMapSourceSampleRejectsIdentityMismatchBeforeMappingValue(t *testing.T) {
+	m := temperatureSourceMapping()
+	sample := SourceSample{
+		Source: SourceIdentity{Protocol: "modbus", Device: "other-device", Point: m.Source.Point},
+		Value: "not-a-number",
+		Unit: m.SourceUnit,
+	}
+	if _, err := MapSourceSample(m, sample); !errors.Is(err, ErrSourceIdentityMismatch) {
+		t.Fatalf("identity must be checked before value parsing, got %v", err)
+	}
+}
