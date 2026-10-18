@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math"
 	"math/big"
-	"strings"
 )
 
 // SourceIdentity identifies one concrete point in an upstream system.
