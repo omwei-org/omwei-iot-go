@@ -175,10 +175,11 @@ go mod tidy
 go test ./... -count=1
 ```
 
-The CI workflow runs this check independently of the root module. This is an
-API compatibility check, not a live transport test against the upstream
-client; the root module's localhost simulator currently tests our own
-minimal test client.
+The CI workflow runs this integration module independently of the root
+module. Its end-to-end test drives the pinned upstream client over a real
+localhost TCP connection and also checks that the client returns an error for
+a well-formed Modbus exception response. This is not hardware-in-the-loop
+validation.
 
 A localhost Modbus TCP simulator test exercises the MBAP frame, function
 code 4/3 register reads, transaction ID, unit ID, model discovery, and final
