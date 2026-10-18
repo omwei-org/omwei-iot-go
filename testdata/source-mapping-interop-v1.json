@@ -183,6 +183,58 @@
         "unit": "degree_Celsius"
       },
       "expected_wire_hex": "0042fffffc18"
+    },
+    {
+      "name": "temperature-descriptor-min-inclusive",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "temp-meter-1",
+          "point": "holding:30001"
+        },
+        "value": "-80",
+        "unit": "degree_Celsius"
+      },
+      "expected_wire_hex": "0042fffec780"
+    },
+    {
+      "name": "temperature-descriptor-max-inclusive",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "temp-meter-1",
+          "point": "holding:30001"
+        },
+        "value": "150",
+        "unit": "degree_Celsius"
+      },
+      "expected_wire_hex": "0042000249f0"
+    },
+    {
+      "name": "temperature-below-descriptor-min",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "temp-meter-1",
+          "point": "holding:30001"
+        },
+        "value": "-80.001",
+        "unit": "degree_Celsius"
+      },
+      "expected_error": "out_of_range"
+    },
+    {
+      "name": "temperature-above-descriptor-max",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "temp-meter-1",
+          "point": "holding:30001"
+        },
+        "value": "150.001",
+        "unit": "degree_Celsius"
+      },
+      "expected_error": "out_of_range"
     }
   ]
 }
