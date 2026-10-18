@@ -55,9 +55,16 @@ func TestParserReturnsMetadataAndDescriptors(t *testing.T) {
 		t.Fatal(err)
 	}
 	d := c.Descriptors[0]
-	if c.Metadata != (Metadata{"org.omwei.core", "1", "0.1.0"}) || len(c.Descriptors) != 1 ||
-		d != (Descriptor{0x0042, "ambient_temperature", "degree_Celsius", 1000, 0, -80000, 150000}) {
+	if c.Metadata != (Metadata{"org.omwei.core", "1", "0.1.0"}) || len(c.Descriptors) != 1 {
 		t.Fatalf("%+v", c)
+	}
+	if d.ID != 0x0042 || d.Label != "ambient_temperature" || d.Unit != "degree_Celsius" ||
+		d.QuantityKind != "temperature" || d.Scale != 1000 || d.Offset != 0 ||
+		d.Min != -80000 || d.Max != 150000 {
+		t.Fatalf("unexpected parsed descriptor: %+v", d)
+	}
+	if len(d.Mappings) != 1 || d.Mappings[0] != (ExternalMapping{"QUDT", "Temperature"}) {
+		t.Fatalf("semantic mappings were not preserved: %+v", d.Mappings)
 	}
 }
 
