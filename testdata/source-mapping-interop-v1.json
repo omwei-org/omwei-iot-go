@@ -118,6 +118,71 @@
         "unit": "kelvin"
       },
       "expected_wire_hex": "004200004e20"
+    },
+    {
+      "name": "round-below-half-positive",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "temp-meter-1",
+          "point": "holding:30001"
+        },
+        "value": "20.00049",
+        "unit": "degree_Celsius"
+      },
+      "expected_wire_hex": "004200004e20"
+    },
+    {
+      "name": "round-above-half-positive",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "temp-meter-1",
+          "point": "holding:30001"
+        },
+        "value": "20.00051",
+        "unit": "degree_Celsius"
+      },
+      "expected_wire_hex": "004200004e21"
+    },
+    {
+      "name": "round-below-half-negative",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "temp-meter-1",
+          "point": "holding:30001"
+        },
+        "value": "-0.00049",
+        "unit": "degree_Celsius"
+      },
+      "expected_wire_hex": "004200000000"
+    },
+    {
+      "name": "round-above-half-negative",
+      "sample": {
+        "source": {
+          "protocol": "modbus",
+          "device": "temp-meter-1",
+          "point": "holding:30001"
+        },
+        "value": "-0.00051",
+        "unit": "degree_Celsius"
+      },
+      "expected_wire_hex": "0042ffffffff"
+    },
+    {
+      "name": "negative-source-scale",
+      "sample": {
+        "source": {
+          "protocol": "test",
+          "device": "edge-fixture",
+          "point": "test:negative-scale"
+        },
+        "value": "1",
+        "unit": "degree_Celsius"
+      },
+      "expected_wire_hex": "0042fffffc18"
     }
   ]
 }
