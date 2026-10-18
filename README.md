@@ -62,20 +62,29 @@ register map.
 Load and validate a profile with:
 
 ```go
-data, err := os.ReadFile("examples/source-mappings-v1.json")
-if err != nil {
-    return err
+import (
+    "os"
+
+    omwei "github.com/omwei-org/omwei-iot-go"
+)
+
+func mapExample() error {
+    data, err := os.ReadFile("examples/source-mappings-v1.json")
+    if err != nil {
+        return err
+    }
+    doc, err := omwei.ParseSourceMappingDocument(data)
+    if err != nil {
+        return err
+    }
+    result, err := omwei.MapSourceValue(doc.Mappings[0], "225")
+    if err != nil {
+        return err
+    }
+    wire := omwei.Encode(result.Atom) // existing six-byte atom format
+    _ = wire
+    return nil
 }
-doc, err := omwei.ParseSourceMappingDocument(data)
-if err != nil {
-    return err
-}
-result, err := omwei.MapSourceValue(doc.Mappings[0], "225")
-if err != nil {
-    return err
-}
-// result.Atom is the canonical ambient-temperature atom.
-// Its wire representation remains the existing six-byte format.
 ```
 
 The transform is explicitly configured as
