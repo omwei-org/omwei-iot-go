@@ -43,3 +43,25 @@ func DecodeSunSpecScaledInteger(raw int64, scaleFactor int16) (string, error) {
 	}
 	return digits, nil
 }
+
+// MapSunSpecModel103ActivePower applies W_SF before canonical mapping.
+func MapSunSpecModel103ActivePower(mapping SourceMapping, source SourceIdentity, raw int64, sf int16) (ConversionResult, error) {
+	if source != mapping.Source {
+		return ConversionResult{}, ErrSourceIdentityMismatch
+	}
+	if source.Protocol != "sunspec-modbus" || !strings.Contains(source.Point, "model:103:W") || !strings.Contains(source.Point, "scale-factor:W_SF") {
+		return ConversionResult{}, ErrInvalidSourceMapping
+	}
+	if err := ValidateSourceMapping(mapping); err != nil {
+		return ConversionResult{}, err
+	}
+	if mapping.ScaleNumerator != 1 || mapping.ScaleDenominator != 1 || mapping.OffsetNumerator != 0 || mapping.OffsetDenominator != 1 {
+		return ConversionResult{}, ErrInvalidSourceMapping
+	}
+	value, err := DecodeSunSpecScaledInteger(raw, sf)
+	if err != nil {
+		return ConversionResult{}, err
+	}
+	return MapSourceSample(mapping, SourceSample{Source: source, Value: value, Unit: mapping.SourceUnit})
+}
+
