@@ -171,6 +171,11 @@ func TestReadAndMapSunSpecModel103ActivePower(t *testing.T) {
 	if _, err := ReadAndMapSunSpecModel103ActivePower(reader, mapping); !errors.Is(err, ErrSourceIdentityMismatch) {
 		t.Fatalf("missing acquisition ID must reject, got %v", err)
 	}
+	reader.snapshot = "poll-20"
+	reader.raw = 0x8000
+	if _, err := ReadAndMapSunSpecModel103ActivePower(reader, mapping); !errors.Is(err, ErrInvalidSunSpecValue) {
+		t.Fatalf("not-implemented W sentinel must reject, got %v", err)
+	}
 }
 
 func TestDecodeSunSpecModel103Registers(t *testing.T) {
