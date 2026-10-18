@@ -6,11 +6,9 @@ import (
 	"math"
 	"reflect"
 	"sync/atomic"
-
 )
 
-// SunSpecModel103RegisterClient is the narrow part of the Modbus client used
-// by SunSpecModel103ModbusAdapter. *modbus.Client implements this interface.
+// SunSpecRegisterType selects the Modbus register table for the adapter.
 type SunSpecRegisterType uint8
 
 const (
