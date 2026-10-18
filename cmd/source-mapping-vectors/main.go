@@ -9,6 +9,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 
 	omwei "github.com/omwei-org/omwei-iot-go"
@@ -54,7 +55,7 @@ func run(profilePath, vectorsPath string) error {
 	var doc vectorDocument
 	if err := decoder.Decode(&doc); err != nil { return fmt.Errorf("parse vectors: %w", err) }
 	var trailing any
-	if err := decoder.Decode(&trailing); err != nil && err.Error() != "EOF" {
+	if err := decoder.Decode(&trailing); err != nil && !errors.Is(err, io.EOF) {
 		return fmt.Errorf("parse vectors trailing data: %w", err)
 	} else if err == nil {
 		return fmt.Errorf("parse vectors: multiple JSON values")
