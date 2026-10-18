@@ -146,22 +146,18 @@ wire result or expected rejection. Alternate documents can be supplied with
 The vector format is language-neutral; this CLI is the Go runner, not itself
 proof that another implementation conforms.
 
-## Transport-neutral interop contract
+## Interop contract and conformance
 
-`SourceSample` is the adapter boundary: it carries the configured source
-identity, a decimal-string value, and the unit of that value. The adapter must
-resolve protocol-specific encodings (including SunSpec `W_SF`) before
-constructing the sample. `MapSourceSample` rejects identity and observed-unit
-mismatches before applying the configured rational transform.
+The normative, language-neutral rules are in
+[`spec/source-mapping-v1.md`](spec/source-mapping-v1.md). The profile and vector
+formats are defined by the JSON Schemas under `schemas/`. The checked-in
+`testdata/source-mapping-interop-v1.json` file is synthetic and covers successful
+mapping plus identity, unit, decimal, and range rejection. Run the Go runner
+with `go run ./cmd/source-mapping-vectors`; its tests also verify that malformed
+vector documents and mismatched wire results fail. Passing this Go runner is
+not proof of conformance by an independent implementation or of a real OT Fabric
+adapter.
 
-The shared test vectors in `testdata/source-mapping-interop-v1.json` cover
-successful Modbus-style and SunSpec-style samples that converge on the same
-six-byte atom, as well as negative identity and unit checks. JSON Schemas for
-profiles and vectors live under `schemas/` so non-Go implementations can validate
-the same documents. Run them with
-`go test ./... -count=1`. These are synthetic contract vectors, not a captured
-device session or proof of vendor register addressing. A future OT Fabric
-adapter should run the same vectors at its integration boundary.
 
 ## Scope
 
