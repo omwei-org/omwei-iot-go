@@ -1,6 +1,7 @@
 package omwei
 
 import (
+	"encoding/hex"
 	"errors"
 	"testing"
 )
