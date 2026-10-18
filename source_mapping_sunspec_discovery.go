@@ -75,7 +75,7 @@ func DiscoverSunSpecModel103(
 		dataStart := address + 2
 		lastData := dataStart + uint32(length) - 1
 		nextHeader := dataStart + uint32(length)
-		if lastData > math.MaxUint16 || nextHeader > math.MaxUint16 {
+		if lastData > math.MaxUint16 {
 			return SunSpecModelHeader{}, ErrInvalidSourceMapping
 		}
 		if modelID == 103 {
@@ -86,6 +86,9 @@ func DiscoverSunSpecModel103(
 				ModelID: modelID, ModelLength: length,
 				HeaderAddress: uint16(address), StartAddress: uint16(dataStart),
 			}, nil
+		}
+		if nextHeader > math.MaxUint16 {
+			return SunSpecModelHeader{}, ErrInvalidSourceMapping
 		}
 		address = nextHeader
 	}
