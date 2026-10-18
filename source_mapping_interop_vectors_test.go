@@ -43,11 +43,18 @@ func TestSourceMappingInteropVectors(t *testing.T) {
 			}
 			if mapping == nil {
 				if tc.ExpectedError == "source_identity_mismatch" {
-					// A negative vector may intentionally name an unconfigured point.
-					if tc.ExpectedWireHex != "" { t.Fatal("negative vector must not expect wire bytes") }
-					return
+					// Use a profile with the same protocol/device but a different point
+					// so MapSourceSample exercises its identity rejection path.
+					for i := range profiles.Mappings {
+						candidate := profiles.Mappings[i]
+						if candidate.Source.Protocol == tc.Sample.Source.Protocol &&
+							candidate.Source.Device == tc.Sample.Source.Device {
+							mapping = &candidate
+							break
+						}
+					}
 				}
-				t.Fatalf("no profile found for source %+v", tc.Sample.Source)
+				if mapping == nil { t.Fatalf("no applicable profile found for source %+v", tc.Sample.Source) }
 			}
 			result, err := MapSourceSample(*mapping, tc.Sample)
 			if tc.ExpectedError != "" {
