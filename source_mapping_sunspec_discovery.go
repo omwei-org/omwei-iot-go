@@ -96,3 +96,31 @@ func isTypedNilSunSpecClient(client SunSpecModel103RegisterClient) bool {
 	v := reflect.ValueOf(client)
 	return v.IsValid() && v.Kind() == reflect.Ptr && v.IsNil()
 }
+
+ 
+// DiscoverSunSpecModel103Adapter performs bounded model discovery and returns
+// an adapter configured with the discovered model ID, length, and data address.
+// Source identity must still be provisioned independently of device-reported
+// registers; discovery does not establish cryptographic device identity.
+func DiscoverSunSpecModel103Adapter(
+	ctx context.Context,
+	client SunSpecModel103RegisterClient,
+	source SourceIdentity,
+	unitID uint8,
+	registerType SunSpecRegisterType,
+	config SunSpecModelDiscoveryConfig,
+) (*SunSpecModel103ModbusAdapter, error) {
+	header, err := DiscoverSunSpecModel103(ctx, client, unitID, registerType, config)
+	if err != nil {
+		return nil, err
+	}
+	if source.Protocol != "sunspec-modbus" || source.Device == "" ||
+		source.Point != "model:103:W;scale-factor:W_SF" {
+		return nil, ErrSourceIdentityMismatch
+	}
+	return &SunSpecModel103ModbusAdapter{
+		Client: client, Source: source, UnitID: unitID, RegisterType: registerType,
+		ModelID: header.ModelID, ModelLength: header.ModelLength,
+		ModelStartAddress: header.StartAddress, Context: ctx,
+	}, nil
+}
