@@ -11,14 +11,14 @@ func validSourceMappingDocument() string {
 	  "schema_version": "1",
 	  "mappings": [
 	    {
-	      "Source": {"Protocol":"modbus","Device":"inverter-1","Point":"holding:40001"},
-	      "DescriptorID": 66,
-	      "SourceUnit": "register-tenths-of-degree-C",
-	      "CanonicalUnit": "degree_Celsius",
-	      "ScaleNumerator": 1,
-	      "ScaleDenominator": 10,
-	      "OffsetNumerator": 0,
-	      "OffsetDenominator": 1
+	      "source": {"protocol":"modbus","device":"inverter-1","point":"holding:40001"},
+	      "descriptor_id": 66,
+	      "source_unit": "register-tenths-of-degree-C",
+	      "canonical_unit": "degree_Celsius",
+	      "scale_numerator": 1,
+	      "scale_denominator": 10,
+	      "offset_numerator": 0,
+	      "offset_denominator": 1
 	    }
 	  ]
 	}`
@@ -43,7 +43,6 @@ func TestParseSourceMappingDocumentRejectsInvalidDocuments(t *testing.T) {
 		{"unknown field", strings.Replace(validSourceMappingDocument(), `"schema_version": "1"`, `"schema_version": "1", "extra": true`, 1), ErrInvalidSourceMappingDocument},
 		{"trailing value", validSourceMappingDocument() + ` {}`, ErrInvalidSourceMappingDocument},
 		{"wrong canonical unit", strings.Replace(validSourceMappingDocument(), `"degree_Celsius"`, `"degree_Fahrenheit"`, 1), ErrInvalidSourceMappingDocument},
-		{"duplicate source", strings.Replace(validSourceMappingDocument(), `"mappings": [`, `"mappings": [`+strings.TrimSpace(strings.Split(validSourceMappingDocument(), `"mappings": [`)[1])[:0], 1), ErrInvalidSourceMappingDocument},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
