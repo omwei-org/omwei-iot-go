@@ -169,3 +169,21 @@ func TestMapSourceSampleRejectsBlankValue(t *testing.T) {
 		t.Fatalf("want invalid decimal, got %v", err)
 	}
 }
+
+func TestMapSourceValueAllowsNegativeScaleAndRejectsZeroScale(t *testing.T) {
+	m := temperatureSourceMapping()
+	m.ScaleNumerator, m.ScaleDenominator = -1, 1
+	m.SourceUnit = "degree_Celsius"
+	result, err := MapSourceValue(m, "1")
+	if err != nil {
+		t.Fatalf("negative scale should be accepted as an explicit transform: %v", err)
+	}
+	if result.Atom.CanonicalValue != -1000 {
+		t.Fatalf("negative scale should map 1 C to -1 C: got %+v", result.Atom)
+	}
+
+	m.ScaleNumerator = 0
+	if _, err := MapSourceValue(m, "1"); !errors.Is(err, ErrInvalidSourceMapping) {
+		t.Fatalf("zero scale must be rejected, got %v", err)
+	}
+}
