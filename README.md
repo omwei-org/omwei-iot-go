@@ -51,6 +51,41 @@ then `cargo build --release --manifest-path rustref/Cargo.toml` and
 
 Keep in sync with the Rust crate: `scripts/sync-from-rust.sh <path-to-omwei_iot>`.
 
+## Source mapping profiles (experimental)
+
+The source-mapping API separates upstream point identity and raw-value transforms
+from the canonical OMWEI descriptor. An illustrative, versioned JSON profile is
+available at `examples/source-mappings-v1.json`. It demonstrates two distinct
+source points mapping to descriptor `0x0042`; it is not a verified vendor
+register map.
+
+Load and validate a profile with:
+
+```go
+data, err := os.ReadFile("examples/source-mappings-v1.json")
+if err != nil {
+    return err
+}
+doc, err := omwei.ParseSourceMappingDocument(data)
+if err != nil {
+    return err
+}
+result, err := omwei.MapSourceValue(doc.Mappings[0], "225")
+if err != nil {
+    return err
+}
+// result.Atom is the canonical ambient-temperature atom.
+// Its wire representation remains the existing six-byte format.
+```
+
+The transform is explicitly configured as
+`canonical physical value = raw value * scale + offset`; the descriptor then
+applies its own encoding scale/offset and range validation. The parser rejects
+unknown JSON fields, unsupported schema versions, invalid profiles, duplicate
+source identities, and canonical-unit mismatches. It does not infer unit
+conversions from unit labels, verify vendor-specific point semantics, or replace
+device documentation. Treat profiles as configuration that requires review.
+
 ## Scope
 
 Ported: descriptors, atoms, 6-byte and 16-byte encodings, decimal conversion,
