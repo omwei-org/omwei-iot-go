@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"reflect"
 )
 
 // SunSpecModelHeader is a discovered model header. StartAddress points to the
