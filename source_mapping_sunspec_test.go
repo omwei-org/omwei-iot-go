@@ -92,6 +92,13 @@ func TestMapSunSpecModel103ActivePowerRejectsBadIdentityAndDoubleScale(t *testin
 	if _, err := MapSunSpecModel103ActivePower(mapping, mapping.Source, 123, -1); !errors.Is(err, ErrInvalidSourceMapping) {
 		t.Fatalf("want double-scale profile rejection, got %v", err)
 	}
+	wrongDescriptor := mapping
+	wrongDescriptor.DescriptorID = 66
+	wrongDescriptor.CanonicalUnit = "degree_Celsius"
+	wrongDescriptor.ScaleNumerator = 1
+	if _, err := MapSunSpecModel103ActivePower(wrongDescriptor, wrongDescriptor.Source, 123, 0); !errors.Is(err, ErrInvalidSourceMapping) {
+		t.Fatalf("want non-power descriptor rejection, got %v", err)
+	}
 }
 
 func TestMapSunSpecModel103SnapshotRequiresCoherentIdentity(t *testing.T) {
