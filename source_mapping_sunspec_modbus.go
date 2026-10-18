@@ -7,13 +7,22 @@ import (
 	"reflect"
 	"sync/atomic"
 
-	modbus "github.com/otfabric/modbus"
 )
 
 // SunSpecModel103RegisterClient is the narrow part of the Modbus client used
 // by SunSpecModel103ModbusAdapter. *modbus.Client implements this interface.
+type SunSpecRegisterType uint8
+
+const (
+	SunSpecHoldingRegister SunSpecRegisterType = iota
+	SunSpecInputRegister
+)
+
+// SunSpecModel103RegisterClient is the narrow part of the Modbus client used
+// by SunSpecModel103ModbusAdapter. *modbus.Client implements both methods.
 type SunSpecModel103RegisterClient interface {
-	ReadRegisters(ctx context.Context, unitID uint8, addr uint16, quantity uint16, regType modbus.RegType) ([]uint16, error)
+	ReadHoldingRegisters(ctx context.Context, unitID uint8, addr uint16, quantity uint16) ([]uint16, error)
+	ReadInputRegisters(ctx context.Context, unitID uint8, addr uint16, quantity uint16) ([]uint16, error)
 }
 
 // SunSpecModel103ModbusAdapter reads Model 103 active power (W + W_SF) from
@@ -23,7 +32,7 @@ type SunSpecModel103ModbusAdapter struct {
 	Client            SunSpecModel103RegisterClient
 	Source            SourceIdentity
 	UnitID            uint8
-	RegisterType      modbus.RegType
+	RegisterType      SunSpecRegisterType
 	ModelID           uint16
 	ModelLength       uint16
 	ModelStartAddress uint16
@@ -54,7 +63,7 @@ func (a *SunSpecModel103ModbusAdapter) ReadModel103ActivePowerRegisters() (
 		a.Source.Point != "model:103:W;scale-factor:W_SF" {
 		return SourceIdentity{}, a.ModelID, 0, 0, "", ErrSourceIdentityMismatch
 	}
-	if a.RegisterType != modbus.HoldingRegister && a.RegisterType != modbus.InputRegister {
+	if a.RegisterType != SunSpecHoldingRegister && a.RegisterType != SunSpecInputRegister {
 		return SourceIdentity{}, a.ModelID, 0, 0, "", ErrInvalidSourceMapping
 	}
 	// Model 103 offsets are zero-based: W is data register 12 and W_SF is 13.
@@ -71,7 +80,13 @@ func (a *SunSpecModel103ModbusAdapter) ReadModel103ActivePowerRegisters() (
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	registers, readErr := a.Client.ReadRegisters(ctx, a.UnitID, uint16(address), 2, a.RegisterType)
+	var registers []uint16
+	var readErr error
+	if a.RegisterType == SunSpecInputRegister {
+		registers, readErr = a.Client.ReadInputRegisters(ctx, a.UnitID, uint16(address), 2)
+	} else {
+		registers, readErr = a.Client.ReadHoldingRegisters(ctx, a.UnitID, uint16(address), 2)
+	}
 	if readErr != nil {
 		return SourceIdentity{}, a.ModelID, 0, 0, "", readErr
 	}
