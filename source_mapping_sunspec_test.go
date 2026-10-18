@@ -93,3 +93,37 @@ func TestMapSunSpecModel103ActivePowerRejectsBadIdentityAndDoubleScale(t *testin
 		t.Fatalf("want double-scale profile rejection, got %v", err)
 	}
 }
+
+func TestMapSunSpecModel103SnapshotRequiresCoherentIdentity(t *testing.T) {
+	mapping := SourceMapping{
+		Source: SourceIdentity{Protocol: "sunspec-modbus", Device: "inverter-2", Point: "model:103:W;scale-factor:W_SF"},
+		DescriptorID: 69, SourceUnit: "watt (after W_SF application)", CanonicalUnit: "watt",
+		ScaleNumerator: 1, ScaleDenominator: 1, OffsetNumerator: 0, OffsetDenominator: 1,
+	}
+	valid := SunSpecModel103ActivePowerSnapshot{
+		Source: mapping.Source, SnapshotID: "poll-00017", ModelID: 103, RawW: 123, WSF: 0,
+	}
+	if got, err := MapSunSpecModel103Snapshot(mapping, valid); err != nil || got.Atom.CanonicalValue != 123 {
+		t.Fatalf("valid snapshot: got %+v, err %v", got, err)
+	}
+	tests := []struct {
+		name string
+		mutate func(*SunSpecModel103ActivePowerSnapshot)
+		want error
+	}{
+		{"missing snapshot id", func(s *SunSpecModel103ActivePowerSnapshot) { s.SnapshotID = "" }, ErrSourceIdentityMismatch},
+		{"wrong model", func(s *SunSpecModel103ActivePowerSnapshot) { s.ModelID = 101 }, ErrSourceIdentityMismatch},
+		{"wrong device", func(s *SunSpecModel103ActivePowerSnapshot) { s.Source.Device = "inverter-3" }, ErrSourceIdentityMismatch},
+		{"wrong point", func(s *SunSpecModel103ActivePowerSnapshot) { s.Source.Point = "model:103:V;scale-factor:V_SF" }, ErrInvalidSourceMapping},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			sample := valid
+			tt.mutate(&sample)
+			if _, err := MapSunSpecModel103Snapshot(mapping, sample); !errors.Is(err, tt.want) {
+				t.Fatalf("want %v, got %v", tt.want, err)
+			}
+		})
+	}
+}
+
