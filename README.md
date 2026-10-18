@@ -126,6 +126,12 @@ authenticate devices, establish data freshness, or infer unit conversions.
 Those responsibilities remain with the adapter/integration layer and must be
 covered by protocol-specific conformance tests.
 
+The normative, language-neutral rules for decimal syntax, rational transforms,
+rounding, validation order, and vector behavior are in
+[`spec/source-mapping-v1.md`](spec/source-mapping-v1.md). Treat this API and
+specification as experimental until the v1 contract has been reviewed and
+implemented by an independent consumer.
+
 ## Run the interop vectors
 
 Run the same checked-in source mapping vectors against the Go implementation:
