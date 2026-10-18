@@ -68,6 +68,12 @@ func startRealClientSimulator(t *testing.T) *realClientSimulator {
 
 func (s *realClientSimulator) address() string { return s.listener.Addr().String() }
 
+func (s *realClientSimulator) setFaultMode(mode string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.faultMode = mode
+}
+
 func (s *realClientSimulator) serveConnection(conn net.Conn) error {
 	_ = conn.SetDeadline(time.Now().Add(5 * time.Second))
 	for {
@@ -144,7 +150,7 @@ func (s *realClientSimulator) serveConnection(conn net.Conn) error {
 	}
 }
 
-func TestPinnedOtfabricClientOverLocalModbusTCPToEABCAtom(t *testing.T) {
+func TestPinnedOtfabricClientOverLocalModbusTCPToCanonicalWattValue(t *testing.T) {
 	simulator := startRealClientSimulator(t)
 	client, err := modbus.New(modbus.Config{
 		URL: "tcp://" + simulator.address(),
@@ -198,7 +204,7 @@ func TestPinnedOtfabricClientOverLocalModbusTCPToEABCAtom(t *testing.T) {
 // The TCP/MBAP frame is well-formed; the server rejects the requested function.
 func TestPinnedOtfabricClientRejectsModbusException(t *testing.T) {
 	simulator := startRealClientSimulator(t)
-	simulator.faultMode = "exception"
+	simulator.setFaultMode("exception")
 
 	client, err := modbus.New(modbus.Config{
 		URL: "tcp://" + simulator.address(),
@@ -217,7 +223,7 @@ func TestPinnedOtfabricClientRejectsModbusException(t *testing.T) {
 		}
 	}()
 
-	_, err = client.ReadInputRegisters(7, 114, 2)
+	_, err = client.ReadInputRegisters(context.Background(), 7, 114, 2)
 	if err == nil {
 		t.Fatal("expected upstream client to reject a valid Modbus exception response")
 	}
