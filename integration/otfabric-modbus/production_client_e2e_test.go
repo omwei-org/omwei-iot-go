@@ -21,6 +21,7 @@ type realClientSimulator struct {
 	listener net.Listener
 	mu sync.Mutex
 	serveErr error
+	faultMode string
 	wg sync.WaitGroup
 }
 
@@ -98,6 +99,24 @@ func (s *realClientSimulator) serveConnection(conn net.Conn) error {
 			return fmt.Errorf("invalid read quantity %d", quantity)
 		}
 
+		s.mu.Lock()
+		faultMode := s.faultMode
+		s.mu.Unlock()
+		if faultMode == "exception" {
+			// A valid Modbus exception PDU: function | 0x80, exception code 2.
+			response := make([]byte, 9)
+			binary.BigEndian.PutUint16(response[0:2], transactionID)
+			binary.BigEndian.PutUint16(response[2:4], 0)
+			binary.BigEndian.PutUint16(response[4:6], 3)
+			response[6] = unitID
+			response[7] = function | 0x80
+			response[8] = 2
+			if _, err := conn.Write(response); err != nil {
+				return err
+			}
+			continue
+		}
+
 		response := make([]byte, 9+int(quantity)*2)
 		binary.BigEndian.PutUint16(response[0:2], transactionID)
 		binary.BigEndian.PutUint16(response[2:4], 0)
@@ -171,5 +190,35 @@ func TestPinnedOtfabricClientOverLocalModbusTCPToEABCAtom(t *testing.T) {
 	}
 	if client.LastObservedTransactionID() == 0 {
 		t.Fatal("expected upstream client to observe a Modbus TCP transaction ID")
+	}
+}
+
+
+// Test the pinned upstream client against a valid Modbus exception response.
+// The TCP/MBAP frame is well-formed; the server rejects the requested function.
+func TestPinnedOtfabricClientRejectsModbusException(t *testing.T) {
+	simulator := startRealClientSimulator(t)
+	simulator.faultMode = "exception"
+
+	client, err := modbus.New(modbus.Config{
+		URL: "tcp://" + simulator.address(),
+		Timeout: 2 * time.Second,
+		DialTimeout: 2 * time.Second,
+	})
+	if err != nil {
+		t.Fatalf("construct otfabric client: %v", err)
+	}
+	if err := client.Open(); err != nil {
+		t.Fatalf("open otfabric client: %v", err)
+	}
+	defer func() {
+		if err := client.Close(); err != nil {
+			t.Errorf("close otfabric client: %v", err)
+		}
+	}()
+
+	_, err = client.ReadInputRegisters(7, 114, 2)
+	if err == nil {
+		t.Fatal("expected upstream client to reject a valid Modbus exception response")
 	}
 }
