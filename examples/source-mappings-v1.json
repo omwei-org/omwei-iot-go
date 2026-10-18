@@ -1,0 +1,33 @@
+{
+  "schema_version": "1",
+  "mappings": [
+    {
+      "source": {
+        "protocol": "modbus",
+        "device": "inverter-1",
+        "point": "holding:40001"
+      },
+      "descriptor_id": 66,
+      "source_unit": "register-tenths-of-degree-C",
+      "canonical_unit": "degree_Celsius",
+      "scale_numerator": 1,
+      "scale_denominator": 10,
+      "offset_numerator": 0,
+      "offset_denominator": 1
+    },
+    {
+      "source": {
+        "protocol": "sunspec",
+        "device": "inverter-2",
+        "point": "model:103:TmpAmb"
+      },
+      "descriptor_id": 66,
+      "source_unit": "degree_Celsius",
+      "canonical_unit": "degree_Celsius",
+      "scale_numerator": 1,
+      "scale_denominator": 1,
+      "offset_numerator": 0,
+      "offset_denominator": 1
+    }
+  ]
+}
