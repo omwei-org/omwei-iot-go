@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"testing"
-
 )
 
 type fakeModel103ModbusClient struct {
