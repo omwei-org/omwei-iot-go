@@ -1,6 +1,7 @@
 package modbusadapter
 
 import (
+	"context"
 	"encoding/binary"
 	"fmt"
 	"io"
@@ -149,7 +150,7 @@ func TestPinnedOtfabricClientOverLocalModbusTCPToEABCAtom(t *testing.T) {
 		Point: "model:103:W;scale-factor:W_SF",
 	}
 	adapter, err := omwei.DiscoverSunSpecModel103Adapter(
-		nil, client, source, 7, omwei.SunSpecInputRegister,
+		context.Background(), client, source, 7, omwei.SunSpecInputRegister,
 		omwei.SunSpecModelDiscoveryConfig{FirstHeaderAddress: 100, MaxModels: 16},
 	)
 	if err != nil {
