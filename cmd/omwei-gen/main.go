@@ -33,8 +33,16 @@ func main() {
 		c.Metadata.RegistryID, c.Metadata.SchemaVersion, c.Metadata.CorpusVersion)
 	b.WriteString("var descriptors = [...]Descriptor{\n")
 	for _, d := range c.Descriptors {
-		fmt.Fprintf(&b, "\t{ID: 0x%04X, Label: %q, Unit: %q, Scale: %d, Offset: %d, Min: %d, Max: %d},\n",
-			d.ID, d.Label, d.Unit, d.Scale, d.Offset, d.Min, d.Max)
+		fmt.Fprintf(&b, "\t{ID: 0x%04X, Label: %q, Unit: %q, QuantityKind: %q, Mappings: []SemanticMapping{",
+			d.ID, d.Label, d.Unit, d.QuantityKind)
+		for i, m := range d.Mappings {
+			if i > 0 {
+				b.WriteString(", ")
+			}
+			fmt.Fprintf(&b, "{Vocabulary: %q, Concept: %q}", m.Vocabulary, m.Concept)
+		}
+		fmt.Fprintf(&b, "}, Scale: %d, Offset: %d, Min: %d, Max: %d},\n",
+			d.Scale, d.Offset, d.Min, d.Max)
 	}
 	b.WriteString("}\n")
 	formatted, err := format.Source(b.Bytes())
