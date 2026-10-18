@@ -86,8 +86,14 @@ func (s *localModbusTCPServer) serveOne(conn net.Conn) error {
 	protocolID := binary.BigEndian.Uint16(header[2:4])
 	length := binary.BigEndian.Uint16(header[4:6])
 	unitID := header[6]
-	if protocolID != 0 || length != 6 || unitID != s.unitID {
+	if protocolID != 0 || length != 6 {
 		return fmt.Errorf("invalid request MBAP protocol=%d length=%d unit=%d", protocolID, length, unitID)
+	}
+	// A Modbus gateway may silently drop requests for an unknown Unit ID.
+	// Simulate that behavior without treating the expected rejection as a
+	// server-side test failure.
+	if unitID != s.unitID {
+		return nil
 	}
 	pdu := make([]byte, 5)
 	if _, err := io.ReadFull(conn, pdu); err != nil {
