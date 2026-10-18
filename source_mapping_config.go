@@ -71,9 +71,6 @@ func ValidateSourceMapping(mapping SourceMapping) error {
 		mapping.OffsetDenominator <= 0 {
 		return ErrInvalidSourceMapping
 	}
-	if _, err := parseDecimal(fmt.Sprintf("%d", mapping.OffsetNumerator)); err != nil {
-		return ErrInvalidSourceMapping
-	}
 	d, ok := Lookup(mapping.DescriptorID)
 	if !ok {
 		return fmt.Errorf("descriptor 0x%04X: %w", mapping.DescriptorID, ErrUnknownDescriptor)
