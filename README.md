@@ -126,6 +126,20 @@ authenticate devices, establish data freshness, or infer unit conversions.
 Those responsibilities remain with the adapter/integration layer and must be
 covered by protocol-specific conformance tests.
 
+## Run the interop vectors
+
+Run the same checked-in source mapping vectors against the Go implementation:
+
+```sh
+go run ./cmd/source-mapping-vectors
+```
+
+The command exits non-zero on the first mismatch and prints each accepted
+wire result or expected rejection. Alternate documents can be supplied with
+`-profiles path/to/profiles.json` and `-vectors path/to/vectors.json`.
+The vector format is language-neutral; this CLI is the Go runner, not itself
+proof that another implementation conforms.
+
 ## Transport-neutral interop contract
 
 `SourceSample` is the adapter boundary: it carries the configured source
