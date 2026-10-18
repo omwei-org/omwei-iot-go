@@ -10,9 +10,9 @@ import (
 // SourceIdentity identifies one concrete point in an upstream system.
 // Point is a protocol-specific address or node identifier.
 type SourceIdentity struct {
-	Protocol string
-	Device   string
-	Point    string
+	Protocol string `json:"protocol"`
+	Device   string `json:"device"`
+	Point    string `json:"point"`
 }
 
 // SourceMapping transforms a raw source value into the canonical physical unit
@@ -21,35 +21,23 @@ type SourceIdentity struct {
 // the raw value; CanonicalUnit must match the descriptor's canonical unit.
 // Unit conversion is not inferred: the configured transform must perform it.
 type SourceMapping struct {
-	Source            SourceIdentity
-	DescriptorID      uint16
-	SourceUnit        string
-	CanonicalUnit     string
-	ScaleNumerator    int64
-	ScaleDenominator  int64
-	OffsetNumerator   int64
-	OffsetDenominator int64
+	Source            SourceIdentity `json:"source"`
+	DescriptorID      uint16         `json:"descriptor_id"`
+	SourceUnit        string         `json:"source_unit"`
+	CanonicalUnit     string         `json:"canonical_unit"`
+	ScaleNumerator    int64          `json:"scale_numerator"`
+	ScaleDenominator  int64          `json:"scale_denominator"`
+	OffsetNumerator   int64          `json:"offset_numerator"`
+	OffsetDenominator int64          `json:"offset_denominator"`
 }
 
 // MapSourceValue applies an explicit source transform and constructs a validated
 // atom. rawValue is a plain decimal string to avoid binary floating-point drift.
 func MapSourceValue(mapping SourceMapping, rawValue string) (ConversionResult, error) {
-	if strings.TrimSpace(mapping.Source.Protocol) == "" ||
-		strings.TrimSpace(mapping.Source.Device) == "" ||
-		strings.TrimSpace(mapping.Source.Point) == "" ||
-		strings.TrimSpace(mapping.SourceUnit) == "" ||
-		strings.TrimSpace(mapping.CanonicalUnit) == "" ||
-		mapping.ScaleNumerator == 0 || mapping.ScaleDenominator <= 0 ||
-		mapping.OffsetDenominator <= 0 {
-		return ConversionResult{}, ErrInvalidSourceMapping
+	if err := ValidateSourceMapping(mapping); err != nil {
+		return ConversionResult{}, err
 	}
-	d, ok := Lookup(mapping.DescriptorID)
-	if !ok {
-		return ConversionResult{}, fmt.Errorf("source mapping descriptor: %w", ErrUnknownDescriptor)
-	}
-	if mapping.CanonicalUnit != d.Unit {
-		return ConversionResult{}, fmt.Errorf("%w: got %q, want %q", ErrSourceUnitMismatch, mapping.CanonicalUnit, d.Unit)
-	}
+	d, _ := Lookup(mapping.DescriptorID)
 	rawNum, rawDen, err := parseDecimal(rawValue)
 	if err != nil {
 		return ConversionResult{}, err
