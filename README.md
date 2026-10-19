@@ -112,100 +112,24 @@ The example profile identifies the model point and scale-factor dependency, but
 the caller remains responsible for reading a coherent pair and validating the
 model/point layout against the applicable SunSpec model specification.
 
-## SunSpec Model 103 Modbus adapter (experimental)
+## SunSpec Model 103 Modbus adapter (optional companion)
 
-The Go package includes a transport interface that matches the register-read
-methods exposed by `github.com/otfabric/modbus`'s `*modbus.Client`, without
-forcing that transport dependency on all users. The integration layer can pass
-its existing client directly to `DiscoverSunSpecModel103Adapter`.
+Protocol discovery and Modbus transport code are maintained in the separate
+[omwei-sunspec-go](https://github.com/omwei-org/omwei-sunspec-go) repository.
+The core deliberately has no third-party transport dependency and does not
+perform network I/O or point discovery.
 
-Discovery starts at the configured first **model-header** register (not the
-SunSpec signature/common block) and is bounded by `MaxModels`. The returned
-adapter then reads Model 103's `W` and `W_SF` together in one two-register
-request and can feed that acquisition straight to the EABC mapper:
+The core retains `DecodeSunSpecScaledInteger`, an exact decimal helper for
+`raw × 10^scale factor`. Protocol adapters should resolve `W` and `W_SF`
+from the same acquisition, validate the applicable model definition, create a
+`SourceSample`, and pass it to `MapSourceSample`. A single Modbus request or
+synthetic test does not prove device-side atomicity, freshness, identity, or
+vendor register-map correctness.
 
-```go
-source := omwei.SourceIdentity{
-    Protocol: "sunspec-modbus",
-    Device:   provisionedDeviceID, // provisioned out of band
-    Point:    "model:103:W;scale-factor:W_SF",
-}
-adapter, err := omwei.DiscoverSunSpecModel103Adapter(
-    ctx, existingModbusClient, source, unitID, omwei.SunSpecInputRegister,
-    omwei.SunSpecModelDiscoveryConfig{
-        FirstHeaderAddress: firstModelHeaderAddress,
-        MaxModels:           64,
-    },
-)
-if err != nil {
-    return err
-}
-result, err := omwei.ReadAndMapSunSpecModel103ActivePower(adapter, mapping)
-if err != nil {
-    return err
-}
-atom := result.Atom
-_ = atom
-```
-
-The nested integration module also runs an end-to-end test with the pinned
-`otfabric/modbus` client connected to a local synthetic Modbus TCP server.
-It exercises the upstream client's `Open`, input-register reads, transaction
-handling, Model 103 discovery and EABC mapping, expecting 123 W from W=1234
-and W_SF=-1. Run the integration tests with:
-
-```sh
-cd integration/otfabric-modbus
-go mod tidy
-go test ./... -count=1
-```
-
-This is transport-level integration against a deterministic simulator, not
-hardware-in-the-loop validation or certification of a particular inverter.
-
-The optional production-client contract check lives in a nested module
-so the core library remains dependency-free. It pins
-`github.com/otfabric/modbus v1.0.0` (Go 1.21-compatible) and verifies at
-compile/test time that its public `*modbus.Client` implements
-`SunSpecModel103RegisterClient`:
-
-```sh
-cd integration/otfabric-modbus
-go mod tidy
-go test ./... -count=1
-```
-
-The CI workflow runs this integration module independently of the root
-module. Its end-to-end test drives the pinned upstream client over a real
-localhost TCP connection and also checks that the client returns an error for
-a well-formed Modbus exception response. This is not hardware-in-the-loop
-validation.
-
-A localhost Modbus TCP simulator test exercises the MBAP frame, function
-code 4/3 register reads, transaction ID, unit ID, model discovery, and final
-mapping without hardware. Run it with:
-
-```sh
-go test ./... -run 'TestSunSpecModel103OverLocalModbusTCPToEABCAtom|TestDiscoverSunSpecModel103|TestSunSpecModel103ModbusAdapter'
-```
-
-The TCP test suite also injects malformed responses: Modbus exception
-frames, truncated exception frames, mismatched transaction IDs and Unit IDs,
-unexpected function codes, incorrect byte counts, and invalid MBAP lengths.
-The client must fail closed for every injected fault.
-
-The simulator uses synthetic registers and is deliberately test-only; it is
-not a production Modbus server and does not replace testing against a vendor
-device or a standards-validated simulator.
-
-Choose `SunSpecInputRegister` or `SunSpecHoldingRegister` according to the
-device's documented register table. Discovery validates the model chain's
-bounds and Model 103's minimum point length; it does not prove the device's
-cryptographic identity or certify that a vendor's register layout matches the
-standard. The snapshot ID labels one successful client-side acquisition; one
-Modbus request does not prove the device updated `W` and `W_SF` atomically.
-Tests use a fake register client, so passing them is not hardware-in-the-loop
-validation.
+The companion's localhost Modbus TCP simulator and synthetic vectors test
+software behavior only. They are not hardware-in-the-loop validation, vendor
+certification, or a claim of EABC conformance. See the companion README for
+current adapter scope and limitations.
 
 ## Transport-neutral adapter contract
 

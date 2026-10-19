@@ -36,18 +36,6 @@ jobs:
           go generate ./...
           git diff --exit-code -- registry_generated.go
 
-  otfabric-compatibility:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version: '1.23.x'
-      - name: Verify canonical production Modbus client contract
-        run: |
-          cd integration/otfabric-modbus
-          go mod tidy
-          go test ./... -count=1
 
   differential:
     runs-on: ubuntu-latest
