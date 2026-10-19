@@ -42,9 +42,11 @@ The encoded limits fit within signed `int32`. The corpus uses the descriptor's e
 
 ### Sign convention (must be explicit)
 
-Define positive active power as power flowing **out of the measured device** across the declared measurement boundary; define negative active power as power flowing **into the measured device** across that boundary. Zero denotes no net active-power flow at that boundary.
+**SunSpec Model 103 convention verified:** the `W` point is signed active power scaled by `W_SF`. SunSpec's DER sign convention defines positive active power as generation/injection by the DER and negative active power as absorption by the DER. See the [SunSpec DER Information Model Specification](https://sunspec.org/wp-content/uploads/2021/02/SunSpec-DER-Information-Model-Specification-V1-0-02-01-2021.pdf), which states that injection is positive and absorption is negative.
 
-The source mapping must identify the device and the relevant point/boundary. An adapter must apply a sign inversion only when the source vendor's documented convention requires it. Never infer sign from a point label, device class, or observed values. Where a device exposes multiple phases or multiple electrical boundaries, aggregation and boundary selection must be documented separately; this descriptor alone does not define them.
+For this proposal, positive means active power flowing **out of the declared DER/device boundary** and negative means active power flowing **into it**. These descriptions align only when the measured boundary is the DER's AC interface and the source follows the SunSpec generator-reference convention. Do not generalize this sign convention to arbitrary devices or protocols without checking their documented reference direction.
+
+The source mapping must identify the device and relevant measurement boundary. An adapter may invert sign only when the source's documented convention requires it and that transformation is explicit in the mapping. Never infer sign from a point label, device class, or observed values. Where a device exposes multiple phases or electrical boundaries, aggregation and boundary selection must be documented separately; this descriptor alone does not define them.
 
 ## 3. Keep active, apparent, and reactive power distinct
 
@@ -76,21 +78,21 @@ The corpus is shared with the Rust crate `Equinibrium/omwei_iot`; Go generates i
 ### Sequence and acceptance gates
 
 1. **Agree the semantics first.** Review the proposed signed range, 0.1 W resolution, sign convention, quantity-kind names, units, and compatibility strategy. Confirm QUDT terms and schema representation.
-2. **Update the shared corpus once the proposal is approved.** Make the same corpus content available to both repositories. Record the corpus version and commit/hash used by each implementation. Do not edit the corpus as part of this documentation-only proposal.
-3. **Add shared vectors.** Include positive, negative, zero, minimum/maximum, just-outside-range, exact-resolution, non-exact rounding, positive/negative midpoint, invalid decimal, and sign-inversion cases. Include expected canonical integer values, `Rounded`, error outcome, and encoded atom bytes where applicable.
-4. **Update the Rust crate.** Update its corpus-driven generation/build path and conformance tests; run the Rust test suite and vectors.
-5. **Update the Go core.** Regenerate the registry, run corpus/schema validation, Go tests, interop vectors, `CGO_ENABLED=0 go build ./...`, and the Rust differential suite.
-6. **Run cross-language parity.** Execute the same vectors in both implementations and compare outcomes and atom bytes. Include the existing differential harness; record exact refs and logs.
-7. **Review and release together.** Both implementations and the shared corpus must pass before either side claims v2 support.
+2. **Allocate and update the shared corpus only after approval.** The corpus/semantic owner must explicitly allocate the new descriptor ID in the coordinated corpus change; this document reserves no ID. Keep `0x0045` unchanged. Publish the same corpus content to both repositories and record its version and commit/hash in each. Do not edit the corpus as part of this documentation-only proposal.
+3. **Update shared vectors in both repositories in the same change sequence.** Add positive, negative, zero, minimum/maximum, just-outside-range, exact-resolution, non-exact rounding, positive/negative midpoint, invalid decimal, and sign-inversion cases. Include expected canonical integer values, `Rounded`, error outcome, and encoded atom bytes where applicable. Go and Rust must consume equivalent logical vectors, with protocol-specific fixtures where needed.
+4. **Update the Rust crate and vectors.** Update its corpus-driven generation/build path and conformance tests; run the Rust test suite and vectors against the approved corpus hash.
+5. **Update the Go core and vectors.** Regenerate the registry, run corpus/schema validation, Go tests, interop vectors, `CGO_ENABLED=0 go build ./...`, and the Rust differential suite against that same corpus hash.
+6. **Run cross-language parity.** Execute the equivalent vectors in both implementations and compare outcomes and atom bytes. Include the existing differential harness; record exact refs and logs.
+7. **Review and release together.** Both implementations, their shared vectors, and the agreed corpus version must pass before either side claims v2 support.
 
 ### Owners / responsibilities
 
-- **Corpus/semantic owner:** approves descriptor identity, ranges, quantity-kind distinctions, sign convention, QUDT references, and corpus version.
-- **Rust maintainer:** updates the Rust crate's corpus/build generation and shared-vector execution.
-- **Go maintainer:** updates generated registry and Go behavior/tests.
-- **Parity reviewer:** checks byte-for-byte atom equality, `Rounded` behavior, error parity, and recorded test evidence.
+- **Corpus/semantic owner (descriptor-ID allocator):** approves descriptor identity, ranges, quantity-kind distinctions, sign convention, QUDT references, corpus version, and allocates the new descriptor ID in the reviewed shared-corpus change.
+- **Rust maintainer:** integrates the approved corpus and equivalent shared vectors into Rust generation/build and tests.
+- **Go maintainer:** integrates the same corpus and equivalent vectors into Go generated registry and tests.
+- **Parity reviewer:** checks byte-for-byte atom equality, `Rounded` behavior, error parity, matching corpus hashes, and recorded test evidence.
 
-These are role assignments for the proposed workflow, not claims that any changes have been implemented or approved.
+These are proposed role assignments, not claims that changes have been implemented or approved.
 
 ## 6. Non-goals and limitations
 
