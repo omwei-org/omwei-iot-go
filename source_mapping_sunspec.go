@@ -7,8 +7,6 @@ import (
 )
 
 var ErrInvalidSunSpecScaleFactor = errors.New("invalid SunSpec scale factor")
-var ErrInvalidSunSpecValue = errors.New("invalid or not-implemented SunSpec value")
-
 // DecodeSunSpecScaledInteger applies the SunSpec scale-factor rule
 // engineering_value = raw * 10^scaleFactor without floating-point arithmetic.
 // The returned decimal string can be passed directly to MapSourceValue.
@@ -43,13 +41,4 @@ func DecodeSunSpecScaledInteger(raw int64, scaleFactor int16) (string, error) {
 		digits = "-" + digits
 	}
 	return digits, nil
-}
-
-// DecodeSunSpecModel103Registers converts unsigned Modbus register words to
-// signed Model 103 values. The 0x8000 sentinel means not implemented.
-func DecodeSunSpecModel103Registers(wRegister, wSFRegister uint16) (int16, int16, error) {
-	if wRegister == 0x8000 || wSFRegister == 0x8000 {
-		return 0, 0, ErrInvalidSunSpecValue
-	}
-	return int16(wRegister), int16(wSFRegister), nil
 }
