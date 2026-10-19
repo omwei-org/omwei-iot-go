@@ -87,6 +87,13 @@ a `sample`, and exactly one of:
 - `expected_wire_hex` for success; or
 - `expected_error` with one of the identifiers in section 3.
 
+A successful case may also include `expected_rounded` (boolean). When present,
+it asserts whether descriptor encoding discarded a non-zero fractional
+remainder before rounding. `true` means rounding was required, even if the
+encoded integer is unchanged; `false` means the transformed value was exactly
+representable in the descriptor's encoded resolution. Error cases do not have
+a rounding outcome.
+
 Unknown fields, duplicate case names, malformed JSON, multiple top-level JSON
 values, missing/ambiguous outcomes, and unsupported error identifiers must fail
 validation. JSON Schema validates document shape; the runner additionally checks

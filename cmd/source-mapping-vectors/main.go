@@ -23,9 +23,11 @@ type vectorDocument struct {
 
 type vectorCase struct {
 	Name string `json:"name"`
+	Note string `json:"note,omitempty"`
 	Sample omwei.SourceSample `json:"sample"`
 	ExpectedWireHex string `json:"expected_wire_hex"`
-	ExpectedError string `json:"expected_error"`
+	ExpectedRounded *bool `json:"expected_rounded"`
+		ExpectedError string `json:"expected_error"`
 }
 
 func expectedErrorName(err error) string {
@@ -119,6 +121,9 @@ func run(profilePath, vectorsPath string) error {
 		got := omwei.Encode(result.Atom)
 		if len(want) != len(got) || string(want) != string(got[:]) {
 			return fmt.Errorf("%s: wire mismatch: want %x, got %x", tc.Name, want, got)
+		}
+		if tc.ExpectedRounded != nil && result.Rounded != *tc.ExpectedRounded {
+			return fmt.Errorf("%s: rounded mismatch: want %t, got %t", tc.Name, *tc.ExpectedRounded, result.Rounded)
 		}
 		fmt.Printf("PASS %s: %x\n", tc.Name, got)
 	}

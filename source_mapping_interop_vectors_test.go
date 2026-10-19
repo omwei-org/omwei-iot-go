@@ -14,7 +14,8 @@ type sourceMappingInteropDocument struct {
 		Name string `json:"name"`
 		Sample SourceSample `json:"sample"`
 		ExpectedWireHex string `json:"expected_wire_hex"`
-		ExpectedError string `json:"expected_error"`
+		ExpectedRounded *bool `json:"expected_rounded"`
+				ExpectedError string `json:"expected_error"`
 	} `json:"cases"`
 }
 
@@ -79,6 +80,9 @@ func TestSourceMappingInteropVectors(t *testing.T) {
 			if err != nil { t.Fatal(err) }
 			if string(got[:]) != string(want) {
 				t.Fatalf("wire bytes: want %x, got %x", want, got)
+			}
+			if tc.ExpectedRounded != nil && result.Rounded != *tc.ExpectedRounded {
+				t.Fatalf("rounded: want %t, got %t", *tc.ExpectedRounded, result.Rounded)
 			}
 		})
 	}

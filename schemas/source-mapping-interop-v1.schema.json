@@ -19,6 +19,7 @@
           "name": {"type": "string", "minLength": 1},
           "sample": {"$ref": "#/$defs/sourceSample"},
           "expected_wire_hex": {"type": "string", "pattern": "^[0-9a-fA-F]{12}$"},
+          "expected_rounded": {"type": "boolean"},
           "expected_error": {"enum": ["source_identity_mismatch", "observed_source_unit_mismatch", "invalid_decimal", "out_of_range"]},
           "note": {"type": "string"}
         },
