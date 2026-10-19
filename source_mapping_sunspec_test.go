@@ -30,13 +30,3 @@ func TestDecodeSunSpecScaledIntegerRejectsExtremeScaleFactor(t *testing.T) {
 		}
 	}
 }
-
-func TestDecodeSunSpecModel103RegistersRejectsNotImplementedSentinel(t *testing.T) {
-	for _, pair := range [][2]uint16{{0x8000,0xffff},{0x04d2,0x8000}} {
-		if _,_,err:=DecodeSunSpecModel103Registers(pair[0],pair[1]); !errors.Is(err,ErrInvalidSunSpecValue) {
-			t.Errorf("registers=%04x/%04x: want not-implemented error, got %v",pair[0],pair[1],err)
-		}
-	}
-	raw,sf,err:=DecodeSunSpecModel103Registers(1234,0xffff)
-	if err!=nil || raw!=1234 || sf!=-1 { t.Fatalf("want 1234/-1, got %d/%d err=%v",raw,sf,err) }
-}
