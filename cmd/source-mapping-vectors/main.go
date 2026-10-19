@@ -23,6 +23,7 @@ type vectorDocument struct {
 
 type vectorCase struct {
 	Name string `json:"name"`
+	Note string `json:"note,omitempty"`
 	Sample omwei.SourceSample `json:"sample"`
 	ExpectedWireHex string `json:"expected_wire_hex"`
 	ExpectedRounded *bool `json:"expected_rounded"`
